@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   basePath,
   assetPrefix: basePath || undefined,
+  transpilePackages: ["@shappoff/ui"],
   images: {
     unoptimized: true,
   },

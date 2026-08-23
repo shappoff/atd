@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node ./scripts/copy-maplibre-worker.mjs",
     "dev": "next dev",
+    "prebuild": "node ./scripts/copy-maplibre-worker.mjs",
     "build": "next build",
     "start": "npx --yes serve@latest out",
     "lint": "biome check .",
@@ -13,6 +15,8 @@
     "node": ">=20.9.0"
   },
   "dependencies": {
+    "@shappoff/ui": "^0.2.9",
+    "maplibre-gl": "^6.5.0",
     "next": "16.3.2",
     "react": "19.2.8",
     "react-dom": "19.2.8"

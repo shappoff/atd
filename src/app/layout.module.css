@@ -1,0 +1,21 @@
+.shell {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.content > * {
+  pointer-events: auto;
+}

@@ -25,6 +25,9 @@
 *.pem
 .idea/
 
+# generated MapLibre worker (copied from maplibre-gl on predev/prebuild)
+/public/maplibre/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
