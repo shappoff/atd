@@ -1,0 +1,4 @@
+export const ATD_PLACES_SPREADSHEET_ID =
+  "1L8jprYoLZGQxh_eeQ3fESQTeeH5KFGPR1GU-TZcACWI";
+
+export const ATD_PLACES_RANGE = "A1:ZZ";
