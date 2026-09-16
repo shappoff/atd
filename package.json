@@ -5,7 +5,8 @@
   "scripts": {
     "predev": "node ./scripts/copy-maplibre-worker.mjs",
     "dev": "next dev",
-    "prebuild": "node ./scripts/copy-maplibre-worker.mjs",
+    "extract": "tsx ./src/scripts/runner.ts",
+    "prebuild": "node ./scripts/copy-maplibre-worker.mjs && tsx ./src/scripts/runner.ts",
     "build": "next build",
     "start": "npx --yes serve@latest out",
     "lint": "biome check .",
@@ -19,13 +20,15 @@
     "maplibre-gl": "^6.5.0",
     "next": "16.3.2",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "googleapis": "^173.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.10",
     "@types/node": "26.2.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
+    "tsx": "^4.23.0",
     "typescript": "7.0.2"
   }
 }

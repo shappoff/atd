@@ -35,3 +35,17 @@ npm run preview
 2. **Build and deployment** → **Source**: GitHub Actions
 
 Сайт будет доступен по адресу `https://shappoff.github.io/atd/`.
+
+## Данные из Google Sheets
+
+Населённые пункты извлекаются из Google-таблицы на этапе prebuild и сохраняются в `public/atdPlaces.json`.
+
+1. Скопируйте `.env.example` в `.env.local` и заполните `PROJECT_ID` / `GAPI_CREDENTIALS_*`.
+2. Запустите извлечение:
+
+```bash
+npm run extract
+```
+
+`npm run build` тоже запускает extract. Если credentials нет (например, в GitHub Actions), шаг пропускается и используется уже сохранённый JSON.
+`eparchy` — годы слева от колонки `kostel` (епархия), `atd` — годы справа (административно-территориальное деление).
