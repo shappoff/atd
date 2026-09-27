@@ -24,9 +24,14 @@ const MapCanvas = dynamic(
 
 type MapViewProps = {
   workerUrl: string;
+  placesUrl: string;
   children?: ReactNode;
 };
 
-export function MapView({ workerUrl, children }: MapViewProps) {
-  return <MapCanvas workerUrl={workerUrl}>{children}</MapCanvas>;
+export function MapView({ workerUrl, placesUrl, children }: MapViewProps) {
+  return (
+    <MapCanvas workerUrl={workerUrl} placesUrl={placesUrl}>
+      {children}
+    </MapCanvas>
+  );
 }

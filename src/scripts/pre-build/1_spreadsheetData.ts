@@ -46,7 +46,8 @@ export default async function extractSpreadsheetData() {
     spreadsheetId: ATD_PLACES_SPREADSHEET_ID,
     gid: meta.gid,
   });
-  const outputPath = persistPlaces(places);
+  const { jsonPath, geojsonPath, featureCount } = persistPlaces(places);
 
-  console.log(`Saved ${places.length} places to ${outputPath}`);
+  console.log(`Saved ${places.length} places to ${jsonPath}`);
+  console.log(`Saved ${featureCount} map features to ${geojsonPath}`);
 }

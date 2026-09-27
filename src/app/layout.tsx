@@ -29,6 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className={styles.map}>
             <MapView
               workerUrl={withBasePath("/maplibre/maplibre-gl-worker.mjs")}
+              placesUrl={withBasePath("/atdPlaces.geojson")}
             />
           </div>
           <div className={styles.content}>{children}</div>
