@@ -38,7 +38,7 @@ npm run preview
 
 ## Данные из Google Sheets
 
-Населённые пункты извлекаются из Google-таблицы на этапе prebuild и сохраняются в `public/atdPlaces.json`.
+Населённые пункты извлекаются из Google-таблицы на этапе prebuild и сохраняются в `public/atdPlaces.json`. Для карты пишется отдельный `public/atdPlaces.geojson` (только точки с координатами) — MapLibre кластеризует их на GPU, без DOM-маркеров.
 
 1. Скопируйте `.env.example` в `.env.local` и заполните `PROJECT_ID` / `GAPI_CREDENTIALS_*`.
 2. Запустите извлечение:
