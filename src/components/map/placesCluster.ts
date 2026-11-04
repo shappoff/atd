@@ -168,11 +168,13 @@ export function attachPlacesClusterInteractions(
   map: MapLibreGlMap,
 ): () => void {
   const popup: Popup = new MapLibrePopup({
-    closeButton: true,
+    closeButton: false,
+    closeOnClick: false,
     offset: 12,
     maxWidth: "280px",
   });
   const canvas = map.getCanvas();
+  let hoveredFeatureId: number | string | undefined;
 
   const expandCluster = (feature: MapGeoJSONFeature) => {
     const clusterId = Number(feature.properties?.cluster_id);
@@ -193,11 +195,21 @@ export function attachPlacesClusterInteractions(
   };
 
   const showPlacePopup = (feature: MapGeoJSONFeature) => {
+    const featureId = feature.id;
+    if (featureId != null && featureId === hoveredFeatureId && popup.isOpen()) {
+      return;
+    }
     const center = featureLngLat(feature);
     if (!center) {
       return;
     }
+    hoveredFeatureId = featureId;
     popup.setLngLat(center).setHTML(popupHtml(feature)).addTo(map);
+  };
+
+  const hidePlacePopup = () => {
+    hoveredFeatureId = undefined;
+    popup.remove();
   };
 
   const onMapClick = (event: MapLayerMouseEvent) => {
@@ -206,14 +218,6 @@ export function attachPlacesClusterInteractions(
     });
     if (clusters[0]) {
       expandCluster(clusters[0]);
-      return;
-    }
-
-    const points = map.queryRenderedFeatures(event.point, {
-      layers: [PLACES_POINT_LAYER_ID],
-    });
-    if (points[0]) {
-      showPlacePopup(points[0]);
     }
   };
 
@@ -224,19 +228,34 @@ export function attachPlacesClusterInteractions(
     canvas.style.cursor = "";
   };
 
+  const onPointHover = (event: MapLayerMouseEvent) => {
+    setPointer();
+    const feature = event.features?.[0];
+    if (feature) {
+      showPlacePopup(feature);
+    }
+  };
+
+  const onPointLeave = () => {
+    clearPointer();
+    hidePlacePopup();
+  };
+
   map.on("click", onMapClick);
   map.on("mouseenter", PLACES_CLUSTER_LAYER_ID, setPointer);
   map.on("mouseleave", PLACES_CLUSTER_LAYER_ID, clearPointer);
-  map.on("mouseenter", PLACES_POINT_LAYER_ID, setPointer);
-  map.on("mouseleave", PLACES_POINT_LAYER_ID, clearPointer);
+  map.on("mouseenter", PLACES_POINT_LAYER_ID, onPointHover);
+  map.on("mousemove", PLACES_POINT_LAYER_ID, onPointHover);
+  map.on("mouseleave", PLACES_POINT_LAYER_ID, onPointLeave);
 
   return () => {
     popup.remove();
     map.off("click", onMapClick);
     map.off("mouseenter", PLACES_CLUSTER_LAYER_ID, setPointer);
     map.off("mouseleave", PLACES_CLUSTER_LAYER_ID, clearPointer);
-    map.off("mouseenter", PLACES_POINT_LAYER_ID, setPointer);
-    map.off("mouseleave", PLACES_POINT_LAYER_ID, clearPointer);
+    map.off("mouseenter", PLACES_POINT_LAYER_ID, onPointHover);
+    map.off("mousemove", PLACES_POINT_LAYER_ID, onPointHover);
+    map.off("mouseleave", PLACES_POINT_LAYER_ID, onPointLeave);
     clearPointer();
   };
 }
