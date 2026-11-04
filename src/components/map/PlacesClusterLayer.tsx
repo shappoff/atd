@@ -1,7 +1,10 @@
 "use client";
 
 import { useMapLibreMap } from "@shappoff/ui/map";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { placeDetailsUrl } from "@/lib/paths";
+import { loadPlaceDetails } from "./loadPlaceDetails";
+import { PlaceDrawer, type PlaceDrawerState } from "./PlaceDrawer";
 import {
   attachPlacesClusterInteractions,
   mountPlacesCluster,
@@ -14,15 +17,66 @@ type PlacesClusterLayerProps = {
 
 export function PlacesClusterLayer({ dataUrl }: PlacesClusterLayerProps) {
   const map = useMapLibreMap();
+  const [open, setOpen] = useState(false);
+  const [place, setPlace] = useState<PlaceDrawerState | null>(null);
 
   useEffect(() => {
+    let active = true;
+    let request = 0;
+
     mountPlacesCluster(map, dataUrl);
-    const detach = attachPlacesClusterInteractions(map);
+    const detach = attachPlacesClusterInteractions(map, (hit) => {
+      const current = ++request;
+      setPlace({
+        title: hit.title,
+        type: hit.type,
+        details: null,
+        error: false,
+      });
+      setOpen(true);
+
+      void loadPlaceDetails(placeDetailsUrl(dataUrl, hit.id), hit.id)
+        .then((details) => {
+          if (!active || current !== request) {
+            return;
+          }
+          setPlace({
+            title: details.title,
+            type: details.type,
+            details,
+            error: false,
+          });
+        })
+        .catch(() => {
+          if (!active || current !== request) {
+            return;
+          }
+          setPlace({
+            title: hit.title,
+            type: hit.type,
+            details: null,
+            error: true,
+          });
+        });
+    });
+
     return () => {
+      active = false;
       detach();
       unmountPlacesCluster(map);
     };
   }, [map, dataUrl]);
 
-  return null;
+  return (
+    <PlaceDrawer
+      open={open}
+      place={place}
+      onOpenChange={setOpen}
+      onOpenChangeComplete={(next) => {
+        if (!next) {
+          setPlace(null);
+        }
+      }}
+    />
+  );
 }

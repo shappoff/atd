@@ -12,6 +12,12 @@ export const PLACES_CLUSTER_LAYER_ID = "atd-places-clusters";
 export const PLACES_CLUSTER_COUNT_LAYER_ID = "atd-places-cluster-count";
 export const PLACES_POINT_LAYER_ID = "atd-places-points";
 
+export type PlaceHit = {
+  id: number;
+  title: string;
+  type: string;
+};
+
 const CLUSTER_MAX_ZOOM = 20;
 const CLUSTER_RADIUS = 1;
 const GLYPHS_URL =
@@ -164,8 +170,21 @@ function placesGeoJsonSource(map: MapLibreGlMap): GeoJSONSource | null {
   return source;
 }
 
+function placeHit(feature: MapGeoJSONFeature): PlaceHit | null {
+  const id = typeof feature.id === "number" ? feature.id : Number(feature.id);
+  if (!Number.isFinite(id)) {
+    return null;
+  }
+  return {
+    id,
+    title: String(feature.properties?.title ?? ""),
+    type: String(feature.properties?.type ?? "").trim(),
+  };
+}
+
 export function attachPlacesClusterInteractions(
   map: MapLibreGlMap,
+  onPlaceClick: (place: PlaceHit) => void,
 ): () => void {
   const popup: Popup = new MapLibrePopup({
     closeButton: false,
@@ -212,13 +231,24 @@ export function attachPlacesClusterInteractions(
     popup.remove();
   };
 
-  const onMapClick = (event: MapLayerMouseEvent) => {
-    const clusters = map.queryRenderedFeatures(event.point, {
-      layers: [PLACES_CLUSTER_LAYER_ID],
-    });
-    if (clusters[0]) {
-      expandCluster(clusters[0]);
+  const onClusterClick = (event: MapLayerMouseEvent) => {
+    const feature = event.features?.[0];
+    if (feature) {
+      expandCluster(feature);
     }
+  };
+
+  const onPointClick = (event: MapLayerMouseEvent) => {
+    const feature = event.features?.[0];
+    if (!feature) {
+      return;
+    }
+    const hit = placeHit(feature);
+    if (!hit) {
+      return;
+    }
+    hidePlacePopup();
+    onPlaceClick(hit);
   };
 
   const setPointer = () => {
@@ -241,7 +271,8 @@ export function attachPlacesClusterInteractions(
     hidePlacePopup();
   };
 
-  map.on("click", onMapClick);
+  map.on("click", PLACES_CLUSTER_LAYER_ID, onClusterClick);
+  map.on("click", PLACES_POINT_LAYER_ID, onPointClick);
   map.on("mouseenter", PLACES_CLUSTER_LAYER_ID, setPointer);
   map.on("mouseleave", PLACES_CLUSTER_LAYER_ID, clearPointer);
   map.on("mouseenter", PLACES_POINT_LAYER_ID, onPointHover);
@@ -250,7 +281,8 @@ export function attachPlacesClusterInteractions(
 
   return () => {
     popup.remove();
-    map.off("click", onMapClick);
+    map.off("click", PLACES_CLUSTER_LAYER_ID, onClusterClick);
+    map.off("click", PLACES_POINT_LAYER_ID, onPointClick);
     map.off("mouseenter", PLACES_CLUSTER_LAYER_ID, setPointer);
     map.off("mouseleave", PLACES_CLUSTER_LAYER_ID, clearPointer);
     map.off("mouseenter", PLACES_POINT_LAYER_ID, onPointHover);

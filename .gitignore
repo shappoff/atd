@@ -28,6 +28,9 @@
 # generated MapLibre worker (copied from maplibre-gl on predev/prebuild)
 /public/maplibre/
 
+# place detail shards generated from public/atdPlaces.json
+/public/places/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

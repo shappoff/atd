@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node ./scripts/copy-maplibre-worker.mjs",
+    "predev": "node ./scripts/copy-maplibre-worker.mjs && tsx ./src/scripts/write-place-files.ts",
     "dev": "next dev",
     "extract": "tsx ./src/scripts/runner.ts",
     "prebuild": "node ./scripts/copy-maplibre-worker.mjs && tsx ./src/scripts/runner.ts",
@@ -16,12 +16,13 @@
     "node": ">=20.9.0"
   },
   "dependencies": {
+    "@base-ui/react": "^1.7.0",
     "@shappoff/ui": "^0.2.9",
+    "googleapis": "^173.0.0",
     "maplibre-gl": "^6.5.0",
     "next": "16.3.2",
     "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "googleapis": "^173.0.0"
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.10",
