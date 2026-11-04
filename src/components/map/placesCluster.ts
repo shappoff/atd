@@ -49,7 +49,7 @@ function popupHtml(feature: MapGeoJSONFeature): string {
   if (!type) {
     return titleHtml;
   }
-  return `${titleHtml}<p class="sui-map-marker__popup-description">${escapeHtml(type)}</p>`;
+  return `<p class="sui-map-marker__popup-description">${escapeHtml(type)}</p>${titleHtml}`;
 }
 
 function placesSource(dataUrl: string) {
