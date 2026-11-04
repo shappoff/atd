@@ -12,8 +12,8 @@ export const PLACES_CLUSTER_LAYER_ID = "atd-places-clusters";
 export const PLACES_CLUSTER_COUNT_LAYER_ID = "atd-places-cluster-count";
 export const PLACES_POINT_LAYER_ID = "atd-places-points";
 
-const CLUSTER_MAX_ZOOM = 14;
-const CLUSTER_RADIUS = 52;
+const CLUSTER_MAX_ZOOM = 20;
+const CLUSTER_RADIUS = 1;
 const GLYPHS_URL =
   "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf";
 const FALLBACK_PRIMARY = "#0f766e";
@@ -56,7 +56,7 @@ function placesSource(dataUrl: string) {
   return {
     type: "geojson" as const,
     data: dataUrl,
-    cluster: true,
+    cluster: false,
     clusterMaxZoom: CLUSTER_MAX_ZOOM,
     clusterRadius: CLUSTER_RADIUS,
   };
