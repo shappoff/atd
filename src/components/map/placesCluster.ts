@@ -1,11 +1,11 @@
-import type {
+import {
   GeoJSONSource,
-  MapGeoJSONFeature,
-  MapLayerMouseEvent,
-  Map as MapLibreGlMap,
-  Popup,
+  type MapGeoJSONFeature,
+  type MapLayerMouseEvent,
+  type Map as MapLibreGlMap,
+  Popup as MapLibrePopup,
+  type Popup,
 } from "maplibre-gl";
-import { Popup as MapLibrePopup } from "maplibre-gl";
 
 export const PLACES_SOURCE_ID = "atd-places";
 export const PLACES_CLUSTER_LAYER_ID = "atd-places-clusters";
@@ -121,7 +121,6 @@ export function mountPlacesCluster(map: MapLibreGlMap, dataUrl: string): void {
       paint: {
         "text-color": "#ffffff",
       },
-      interactive: false,
     });
   }
 
@@ -159,7 +158,7 @@ export function unmountPlacesCluster(map: MapLibreGlMap): void {
 
 function placesGeoJsonSource(map: MapLibreGlMap): GeoJSONSource | null {
   const source = map.getSource(PLACES_SOURCE_ID);
-  if (source?.type !== "geojson") {
+  if (!(source instanceof GeoJSONSource)) {
     return null;
   }
   return source;
