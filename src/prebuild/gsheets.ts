@@ -57,7 +57,7 @@ export async function getFirstSheetMeta(
   });
   const firstSheet = response.data.sheets?.[0]?.properties;
   const title = firstSheet?.title?.trim();
-  if (!title) {
+  if (!firstSheet || !title) {
     throw new Error(`No first sheet found in spreadsheet ${spreadsheetId}`);
   }
 
