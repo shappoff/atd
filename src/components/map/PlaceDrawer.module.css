@@ -9,6 +9,8 @@
 
 .heading {
   min-width: 0;
+  display: flex;
+  gap: var(--sui-space-2);
 }
 
 .close {
