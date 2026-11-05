@@ -3,6 +3,7 @@ import path from "node:path";
 import {
   closePlacesDatabase,
   getPlacesDatabase,
+  hasFirebaseAdminCredentials,
 } from "@/prebuild/firebaseAdmin";
 import { syncPlaceDetails } from "@/prebuild/syncPlaces";
 import type { PlaceItem } from "@/prebuild/types";
@@ -25,6 +26,13 @@ function readPlaces(value: unknown): PlaceItem[] {
 }
 
 export default async function syncPlaces(): Promise<void> {
+  if (!hasFirebaseAdminCredentials()) {
+    console.warn(
+      "Skipping Firebase place sync: missing Firebase admin credentials. Set NEXT_PUBLIC_FIREBASE_DATABASE_URL, NEXT_PUBLIC_FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY (see .env.example).",
+    );
+    return;
+  }
+
   if (!fs.existsSync(jsonPath)) {
     console.warn(
       "Skipping Firebase place sync: public/atdPlaces.json is missing.",

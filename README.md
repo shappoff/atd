@@ -47,5 +47,7 @@ npm run preview
 npm run extract
 ```
 
-`npm run build` тоже запускает extract. Если credentials нет (например, в GitHub Actions), шаг пропускается и используется уже сохранённый JSON.
+`npm run build` тоже запускает extract. Если credentials нет, шаг пропускается и используется уже сохранённый JSON. Синхронизация карточек мест в Firebase Realtime Database тоже пропускается, пока не заданы `NEXT_PUBLIC_FIREBASE_DATABASE_URL`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` и `FIREBASE_PRIVATE_KEY`.
+
+В GitHub Actions эти имена берутся из repository secrets (как в `.env.example`) и передаются в шаг Build. Без `NEXT_PUBLIC_FIREBASE_*` сайт собирается, но загрузка карточки места в браузере не заработает: Next вшивает эти переменные на этапе сборки.
 `eparchy` — годы слева от колонки `kostel` (епархия), `atd` — годы справа (административно-территориальное деление).
