@@ -1,5 +1,6 @@
 import {
   GeoJSONSource,
+  LngLatBounds,
   type MapGeoJSONFeature,
   type MapLayerMouseEvent,
   type Map as MapLibreGlMap,
@@ -21,6 +22,9 @@ export type PlaceHit = {
 
 const CLUSTER_MAX_ZOOM = 20;
 const CLUSTER_RADIUS = 1;
+const FRAME_PADDING = 48;
+const FRAME_MAX_ZOOM = 13;
+const FRAME_DURATION = 800;
 const GLYPHS_URL =
   "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf";
 const FALLBACK_PRIMARY = "#0f766e";
@@ -185,6 +189,35 @@ export function setPlacesClusterData(
     return;
   }
   source.setData(data);
+}
+
+export function framePlaces(map: MapLibreGlMap, data: PlacesGeoJson): void {
+  const bounds = placesBounds(data);
+  if (!bounds) {
+    return;
+  }
+  map.fitBounds(bounds, {
+    padding: FRAME_PADDING,
+    maxZoom: FRAME_MAX_ZOOM,
+    duration: FRAME_DURATION,
+    linear: true,
+  });
+}
+
+function placesBounds(data: PlacesGeoJson): LngLatBounds | null {
+  let bounds: LngLatBounds | null = null;
+  for (const feature of data.features) {
+    const [lng, lat] = feature.geometry.coordinates;
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+      continue;
+    }
+    if (!bounds) {
+      bounds = new LngLatBounds([lng, lat], [lng, lat]);
+      continue;
+    }
+    bounds.extend([lng, lat]);
+  }
+  return bounds;
 }
 
 function placeHit(feature: MapGeoJSONFeature): PlaceHit | null {

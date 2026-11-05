@@ -1,14 +1,18 @@
 "use client";
 
 import { useMapLibreMap } from "@shappoff/ui/map";
-import { useEffect, useState } from "react";
-import type { AtdFilterSelection } from "@/prebuild/atdHierarchy";
+import { useEffect, useRef, useState } from "react";
+import {
+  type AtdFilterSelection,
+  hasAtdFilterSelection,
+} from "@/prebuild/atdHierarchy";
 import type { PlacesGeoJson } from "@/prebuild/placesGeoJson";
 import { filterPlacesGeoJson } from "./filterPlacesGeoJson";
 import { loadPlaceDetails } from "./loadPlaceDetails";
 import { PlaceDrawer, type PlaceDrawerState } from "./PlaceDrawer";
 import {
   attachPlacesClusterInteractions,
+  framePlaces,
   mountPlacesCluster,
   setPlacesClusterData,
   unmountPlacesCluster,
@@ -29,6 +33,7 @@ export function PlacesClusterLayer({
   const [open, setOpen] = useState(false);
   const [place, setPlace] = useState<PlaceDrawerState | null>(null);
   const [geojson, setGeojson] = useState<PlacesGeoJson | null>(null);
+  const framed = useRef(false);
 
   useEffect(() => {
     let alive = true;
@@ -111,7 +116,13 @@ export function PlacesClusterLayer({
     if (!active || !geojson) {
       return;
     }
-    setPlacesClusterData(map, filterPlacesGeoJson(geojson, filter));
+    const places = filterPlacesGeoJson(geojson, filter);
+    setPlacesClusterData(map, places);
+    if (!hasAtdFilterSelection(filter) && !framed.current) {
+      return;
+    }
+    framePlaces(map, places);
+    framed.current = true;
   }, [active, map, geojson, filter]);
 
   return (
