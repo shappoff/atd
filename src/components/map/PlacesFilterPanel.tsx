@@ -69,7 +69,6 @@ export function PlacesFilterPanel({
     >
       <FilterCombobox
         label="Губерния"
-        placeholder="Все губернии"
         items={options.gubernias}
         value={value.gubernia}
         disabled={disabled}
@@ -82,7 +81,6 @@ export function PlacesFilterPanel({
       />
       <FilterCombobox
         label="Уезд"
-        placeholder="Все уезды"
         items={options.uezds}
         value={value.uezd}
         disabled={disabled}
@@ -95,7 +93,6 @@ export function PlacesFilterPanel({
       />
       <FilterCombobox
         label="Волость"
-        placeholder="Все волости"
         items={options.volosts}
         value={value.volost}
         disabled={disabled}
