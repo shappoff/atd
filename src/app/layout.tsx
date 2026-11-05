@@ -7,6 +7,7 @@ import {
   absoluteUrl,
   withBasePath,
 } from "@/lib/paths";
+import { DEFAULT_TITLE, SITE_TITLE_TEMPLATE } from "@/lib/siteTitle";
 import "@shappoff/ui/styles.css";
 import "./globals.css";
 import styles from "./layout.module.css";
@@ -24,8 +25,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(absoluteUrl("/")),
   title: {
-    default: "Административно-территориальное деление",
-    template: "%s — АТД",
+    default: DEFAULT_TITLE,
+    template: SITE_TITLE_TEMPLATE,
   },
   description: "Карта губерний, уездов, волостей и населённых пунктов.",
   openGraph: {
