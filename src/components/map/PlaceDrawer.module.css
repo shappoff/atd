@@ -68,6 +68,26 @@
   gap: var(--sui-space-2);
 }
 
+.eparchy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sui-space-2);
+}
+
+.parish {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sui-space-1);
+}
+
+.parishUnit {
+  margin: 0;
+}
+
+.parish .names {
+  padding-left: var(--sui-space-3);
+}
+
 .years {
   display: flex;
   flex-direction: column;

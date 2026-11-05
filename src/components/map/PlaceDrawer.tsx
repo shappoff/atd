@@ -307,12 +307,84 @@ function CoordinatesField({ value }: { value: string }) {
   );
 }
 
+type EparchyPart =
+  | { kind: "text"; text: string }
+  | { kind: "parish"; unit: string; names: string[] };
+
+function eparchyParts(value: string): EparchyPart[] {
+  return value
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const bar = part.indexOf("|");
+      if (bar < 0) {
+        return { kind: "text", text: part };
+      }
+      const unit = part.slice(0, bar).trim();
+      const names = part
+        .slice(bar + 1)
+        .split("/")
+        .map((name) => name.trim())
+        .filter(Boolean);
+      return { kind: "parish", unit, names };
+    });
+}
+
+function partKey(part: EparchyPart): string {
+  if (part.kind === "text") {
+    return part.text;
+  }
+  return `${part.unit}|${part.names.join("/")}`;
+}
+
+function EparchyValue({ value }: { value: string }) {
+  const parts = eparchyParts(value);
+  if (parts.length === 0) {
+    return null;
+  }
+  if (parts.length === 1 && parts[0]?.kind === "text") {
+    return <p className={styles.value}>{parts[0].text}</p>;
+  }
+
+  const seen = new Map<string, number>();
+  return (
+    <ul className={`${styles.list} ${styles.eparchy}`}>
+      {parts.map((part) => {
+        const id = partKey(part);
+        const count = seen.get(id) ?? 0;
+        seen.set(id, count + 1);
+        const key = count === 0 ? id : `${id}:${count}`;
+        if (part.kind === "text") {
+          return <li key={key}>{part.text}</li>;
+        }
+        return (
+          <li key={key} className={styles.parish}>
+            {part.unit ? (
+              <p className={styles.parishUnit}>{part.unit}</p>
+            ) : null}
+            {part.names.length > 0 ? (
+              <ul className={`${styles.list} ${styles.names}`}>
+                {part.names.map((name) => (
+                  <li key={name}>{name}</li>
+                ))}
+              </ul>
+            ) : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function YearFields({
   label,
   records,
+  renderValue,
 }: {
   label: string;
   records: Record<string, string>;
+  renderValue?: (value: string) => ReactNode;
 }) {
   const entries = Object.entries(records)
     .filter(([, value]) => value.trim())
@@ -324,12 +396,15 @@ function YearFields({
   return (
     <Field label={label}>
       <div className={styles.years}>
-        {entries.map(([year, value]) => (
-          <div key={year} className={styles.year}>
-            <span className={styles.yearLabel}>{year}</span>
-            <TextValue value={withoutYearPrefix(year, value)} />
-          </div>
-        ))}
+        {entries.map(([year, value]) => {
+          const text = withoutYearPrefix(year, value);
+          return (
+            <div key={year} className={styles.year}>
+              <span className={styles.yearLabel}>{year}</span>
+              {renderValue ? renderValue(text) : <TextValue value={text} />}
+            </div>
+          );
+        })}
       </div>
     </Field>
   );
@@ -366,7 +441,11 @@ function PlaceFacts({ place }: { place: PlaceDetails }) {
     <div className={styles.fields}>
       <OwnerField value={place.owner} />
       <KostelField value={place.kostel} />
-      <YearFields label="Епархия" records={place.eparchy} />
+      <YearFields
+        label="Епархия"
+        records={place.eparchy}
+        renderValue={(value) => <EparchyValue value={value} />}
+      />
       <YearFields label="Административное деление" records={place.atd} />
       <CoordinatesField value={coordinates(place)} />
       <LinkField value={place.link} />
