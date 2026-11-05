@@ -212,7 +212,8 @@
   background: var(--sui-color-bg);
   color: var(--sui-color-fg);
   font: inherit;
-  font-size: 0.875rem;
+  /* 16px minimum: a smaller field makes mobile browsers zoom the page on focus. */
+  font-size: max(16px, 0.875rem);
   text-align: left;
   outline: none;
 }
@@ -224,4 +225,11 @@
 
 .search::placeholder {
   color: var(--sui-color-muted);
+}
+
+/* Under 16px, mobile browsers zoom the page on focus and fixed menus leave the screen. */
+@media (any-pointer: coarse) {
+  .input {
+    font-size: max(16px, 0.875rem);
+  }
 }
