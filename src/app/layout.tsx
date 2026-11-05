@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { MapView } from "@/components/map/MapView";
-import { ATD_FILTERS_PUBLIC_PATH, withBasePath } from "@/lib/paths";
+import {
+  ATD_FILTERS_PUBLIC_PATH,
+  ATD_PLACES_PUBLIC_PATH,
+  absoluteUrl,
+  withBasePath,
+} from "@/lib/paths";
 import "@shappoff/ui/styles.css";
 import "./globals.css";
 import styles from "./layout.module.css";
@@ -17,8 +22,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ATD",
-  description: "Next.js static site",
+  metadataBase: new URL(absoluteUrl("/")),
+  title: {
+    default: "Административно-территориальное деление",
+    template: "%s — АТД",
+  },
+  description: "Карта губерний, уездов, волостей и населённых пунктов.",
+  openGraph: {
+    locale: "ru_RU",
+    type: "website",
+    siteName: "АТД",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -29,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className={styles.map}>
             <MapView
               workerUrl={withBasePath("/maplibre/maplibre-gl-worker.mjs")}
-              placesUrl={withBasePath("/atdPlaces.geojson")}
+              placesUrl={withBasePath(ATD_PLACES_PUBLIC_PATH)}
               filtersUrl={withBasePath(ATD_FILTERS_PUBLIC_PATH)}
             />
           </div>

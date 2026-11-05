@@ -16,6 +16,11 @@
   pointer-events: none;
 }
 
-.content > * {
+.content > :not(:global(.atd-seo)) {
   pointer-events: auto;
+}
+
+.content > :global(.atd-seo),
+.content > :global(.atd-seo) * {
+  pointer-events: none;
 }
