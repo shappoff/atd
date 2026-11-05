@@ -28,11 +28,26 @@ export const EMPTY_ATD_FILTER_SELECTION: AtdFilterSelection = {
   volost: null,
 };
 
+export const ATD_LEVELS = ["gubernia", "uezd", "volost"] as const;
+
+export type AtdLevel = (typeof ATD_LEVELS)[number];
+
 export const ATD_PATH_SEP = "\u001f";
 
-const GUBERNA_SUFFIX = /губерния$/i;
-const UEZD_SUFFIX = /уезд$/i;
-const VOLOST_SUFFIX = /волость$/i;
+const ATD_LEVEL_SUFFIX: Record<AtdLevel, RegExp> = {
+  gubernia: /губерния$/i,
+  uezd: /уезд$/i,
+  volost: /волость$/i,
+};
+
+export function atdLevelOf(name: string): AtdLevel | null {
+  for (const level of ATD_LEVELS) {
+    if (ATD_LEVEL_SUFFIX[level].test(name)) {
+      return level;
+    }
+  }
+  return null;
+}
 
 function normalizePart(value: string): string {
   return value.trim().replace(/\s+/g, " ");
@@ -45,33 +60,25 @@ function withoutYearPrefix(year: string, value: string): string {
 
 export function parseAtdPath(year: string, value: string): AtdPath | null {
   const body = withoutYearPrefix(year, value);
-  let gubernia = "";
-  let uezd = "";
-  let volost = "";
+  const path: AtdPath = { gubernia: "", uezd: "", volost: "" };
 
   for (const part of body.split(";")) {
     const text = normalizePart(part);
     if (!text) {
       continue;
     }
-    if (!gubernia && GUBERNA_SUFFIX.test(text)) {
-      gubernia = text;
+    const level = atdLevelOf(text);
+    if (!level || path[level]) {
       continue;
     }
-    if (!uezd && UEZD_SUFFIX.test(text)) {
-      uezd = text;
-      continue;
-    }
-    if (!volost && VOLOST_SUFFIX.test(text)) {
-      volost = text;
-    }
+    path[level] = text;
   }
 
-  if (!gubernia && !uezd && !volost) {
+  if (!path.gubernia && !path.uezd && !path.volost) {
     return null;
   }
 
-  return { gubernia, uezd, volost };
+  return path;
 }
 
 export function collectAtdPaths(atd: Record<string, string>): AtdPath[] {

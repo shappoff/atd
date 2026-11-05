@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { MapView } from "@/components/map/MapView";
-import { withBasePath } from "@/lib/paths";
+import { ATD_FILTERS_PUBLIC_PATH, withBasePath } from "@/lib/paths";
 import "@shappoff/ui/styles.css";
 import "./globals.css";
 import styles from "./layout.module.css";
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <MapView
               workerUrl={withBasePath("/maplibre/maplibre-gl-worker.mjs")}
               placesUrl={withBasePath("/atdPlaces.geojson")}
-              filtersUrl={withBasePath("/atdFilters.json")}
+              filtersUrl={withBasePath(ATD_FILTERS_PUBLIC_PATH)}
             />
           </div>
           <div className={styles.content}>{children}</div>
