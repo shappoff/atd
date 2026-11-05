@@ -17,11 +17,13 @@ import {
 type PlacesClusterLayerProps = {
   dataUrl: string;
   filter: AtdFilterSelection;
+  active: boolean;
 };
 
 export function PlacesClusterLayer({
   dataUrl,
   filter,
+  active,
 }: PlacesClusterLayerProps) {
   const map = useMapLibreMap();
   const [open, setOpen] = useState(false);
@@ -29,7 +31,7 @@ export function PlacesClusterLayer({
   const [geojson, setGeojson] = useState<PlacesGeoJson | null>(null);
 
   useEffect(() => {
-    let active = true;
+    let alive = true;
 
     void fetch(dataUrl)
       .then((response) => {
@@ -39,27 +41,27 @@ export function PlacesClusterLayer({
         return response.json() as Promise<PlacesGeoJson>;
       })
       .then((data) => {
-        if (active) {
+        if (alive) {
           setGeojson(data);
         }
       })
       .catch(() => {
-        if (active) {
+        if (alive) {
           setGeojson({ type: "FeatureCollection", features: [] });
         }
       });
 
     return () => {
-      active = false;
+      alive = false;
     };
   }, [dataUrl]);
 
   useEffect(() => {
-    if (!geojson) {
+    if (!active || !geojson) {
       return;
     }
 
-    let active = true;
+    let alive = true;
     let request = 0;
 
     mountPlacesCluster(map, geojson);
@@ -75,7 +77,7 @@ export function PlacesClusterLayer({
 
       void loadPlaceDetails(hit.id)
         .then((details) => {
-          if (!active || current !== request) {
+          if (!alive || current !== request) {
             return;
           }
           setPlace({
@@ -86,7 +88,7 @@ export function PlacesClusterLayer({
           });
         })
         .catch(() => {
-          if (!active || current !== request) {
+          if (!alive || current !== request) {
             return;
           }
           setPlace({
@@ -99,18 +101,18 @@ export function PlacesClusterLayer({
     });
 
     return () => {
-      active = false;
+      alive = false;
       detach();
       unmountPlacesCluster(map);
     };
-  }, [map, geojson]);
+  }, [active, map, geojson]);
 
   useEffect(() => {
-    if (!geojson) {
+    if (!active || !geojson) {
       return;
     }
     setPlacesClusterData(map, filterPlacesGeoJson(geojson, filter));
-  }, [map, geojson, filter]);
+  }, [active, map, geojson, filter]);
 
   return (
     <PlaceDrawer

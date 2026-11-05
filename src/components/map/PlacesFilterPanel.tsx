@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   type AtdFilterIndex,
   type AtdFilterSelection,
@@ -11,7 +11,7 @@ import { FilterCombobox } from "./FilterCombobox";
 import styles from "./PlacesFilterPanel.module.css";
 
 type PlacesFilterPanelProps = {
-  filtersUrl: string;
+  index: AtdFilterIndex | null;
   value: AtdFilterSelection;
   onChange: (value: AtdFilterSelection) => void;
 };
@@ -19,43 +19,11 @@ type PlacesFilterPanelProps = {
 const FILTER_PANEL_OFFSET_VAR = "--atd-filter-panel-offset";
 
 export function PlacesFilterPanel({
-  filtersUrl,
+  index,
   value,
   onChange,
 }: PlacesFilterPanelProps) {
   const panelRef = useRef<HTMLFormElement>(null);
-  const [index, setIndex] = useState<AtdFilterIndex | null>(null);
-
-  useEffect(() => {
-    let active = true;
-
-    void fetch(filtersUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load filters: ${response.status}`);
-        }
-        return response.json() as Promise<AtdFilterIndex>;
-      })
-      .then((data) => {
-        if (!active) {
-          return;
-        }
-        if (!data || !Array.isArray(data.paths)) {
-          setIndex({ paths: [] });
-          return;
-        }
-        setIndex(data);
-      })
-      .catch(() => {
-        if (active) {
-          setIndex({ paths: [] });
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [filtersUrl]);
 
   useEffect(() => {
     const panel = panelRef.current;

@@ -1,14 +1,12 @@
 "use client";
 
 import { MapLibreMap } from "@shappoff/ui/map";
-import { type ReactNode, useState } from "react";
-import {
-  type AtdFilterSelection,
-  EMPTY_ATD_FILTER_SELECTION,
-} from "@/prebuild/atdHierarchy";
+import type { ReactNode } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { PlacesClusterLayer } from "./PlacesClusterLayer";
 import { PlacesFilterPanel } from "./PlacesFilterPanel";
+import { useAtdFilterIndex } from "./useAtdFilterIndex";
+import { useAtdFilterRoute } from "./useAtdFilterRoute";
 
 const MAP_ARIA_LABEL = "Карта Беларуси";
 
@@ -25,18 +23,17 @@ export function MapCanvas({
   filtersUrl,
   children,
 }: MapCanvasProps) {
-  const [filter, setFilter] = useState<AtdFilterSelection>(
-    EMPTY_ATD_FILTER_SELECTION,
-  );
+  const index = useAtdFilterIndex(filtersUrl);
+  const { selection, ready, onChange } = useAtdFilterRoute(index);
 
   return (
     <MapLibreMap ariaLabel={MAP_ARIA_LABEL} workerUrl={workerUrl}>
-      <PlacesFilterPanel
-        filtersUrl={filtersUrl}
-        value={filter}
-        onChange={setFilter}
+      <PlacesFilterPanel index={index} value={selection} onChange={onChange} />
+      <PlacesClusterLayer
+        dataUrl={placesUrl}
+        filter={selection}
+        active={ready}
       />
-      <PlacesClusterLayer dataUrl={placesUrl} filter={filter} />
       {children}
     </MapLibreMap>
   );
