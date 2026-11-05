@@ -6,6 +6,7 @@ import {
   type AtdFilterSelection,
   atdFilterOptions,
   constrainAtdSelection,
+  EMPTY_ATD_FILTER_SELECTION,
   hasAtdFilterSelection,
 } from "@/prebuild/atdHierarchy";
 import { FilterCombobox } from "./FilterCombobox";
@@ -113,6 +114,13 @@ export function PlacesFilterPanel({
     onChange(constrainAtdSelection(index, next));
   }
 
+  function clearAll() {
+    onChange(EMPTY_ATD_FILTER_SELECTION);
+    if (narrow) {
+      setOpen(false);
+    }
+  }
+
   return (
     <div className={styles.root}>
       <button
@@ -180,6 +188,16 @@ export function PlacesFilterPanel({
             })
           }
         />
+        {filtersActive ? (
+          <button
+            type="button"
+            className={styles.clearAll}
+            disabled={disabled}
+            onClick={clearAll}
+          >
+            Очистить все фильтры
+          </button>
+        ) : null}
       </form>
     </div>
   );
