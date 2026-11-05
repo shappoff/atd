@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { MapView } from "@/components/map/MapView";
+import { GAAnalytics } from "@/components/shared/GAAnalytics";
 import {
   ATD_FILTERS_PUBLIC_PATH,
   ATD_PLACES_PUBLIC_PATH,
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
           <div className={styles.content}>{children}</div>
         </div>
+        <GAAnalytics />
       </body>
     </html>
   );
