@@ -123,6 +123,39 @@ function TextValue({ value }: { value: string }) {
   );
 }
 
+function kostelNames(value: string): string[] {
+  const bar = value.indexOf("|");
+  const source = bar >= 0 ? value.slice(bar + 1) : "";
+  return source
+    .split("/")
+    .map((name) => name.trim())
+    .filter(Boolean);
+}
+
+function KostelField({ value }: { value: string }) {
+  const names = kostelNames(value);
+  if (names.length === 0) {
+    return null;
+  }
+  if (names.length === 1) {
+    return (
+      <Field label="Костёл">
+        <p className={styles.value}>{names[0]}</p>
+      </Field>
+    );
+  }
+
+  return (
+    <Field label="Костёл">
+      <ul className={`${styles.list} ${styles.names}`}>
+        {names.map((name) => (
+          <li key={name}>{name}</li>
+        ))}
+      </ul>
+    </Field>
+  );
+}
+
 function OwnerField({ value }: { value: string }) {
   const record = ownerRecord(value);
   if (!record) {
@@ -274,17 +307,6 @@ function CoordinatesField({ value }: { value: string }) {
   );
 }
 
-function TextField({ label, value }: { label: string; value: string }) {
-  if (!value.trim()) {
-    return null;
-  }
-  return (
-    <Field label={label}>
-      <TextValue value={value} />
-    </Field>
-  );
-}
-
 function YearFields({
   label,
   records,
@@ -343,7 +365,7 @@ function PlaceFacts({ place }: { place: PlaceDetails }) {
   return (
     <div className={styles.fields}>
       <OwnerField value={place.owner} />
-      <TextField label="Костёл" value={place.kostel} />
+      <KostelField value={place.kostel} />
       <YearFields label="Епархия" records={place.eparchy} />
       <YearFields label="Административное деление" records={place.atd} />
       <CoordinatesField value={coordinates(place)} />

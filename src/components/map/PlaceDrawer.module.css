@@ -62,6 +62,12 @@
   list-style: none;
 }
 
+.names {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sui-space-2);
+}
+
 .years {
   display: flex;
   flex-direction: column;
