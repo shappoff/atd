@@ -1,8 +1,13 @@
 "use client";
 
-import { MapLibreMap, useMapLibreMap } from "@shappoff/ui/map";
-import { type ReactNode, useEffect } from "react";
+import {
+  MapLibreMap,
+  type TileLayerId,
+  useMapLibreMap,
+} from "@shappoff/ui/map";
+import { type ReactNode, useEffect, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { BasemapSelect } from "./BasemapSelect";
 import { PlacesClusterLayer } from "./PlacesClusterLayer";
 import { PlacesFilterPanel } from "./PlacesFilterPanel";
 import { useAtdFilterIndex } from "./useAtdFilterIndex";
@@ -36,10 +41,17 @@ export function MapCanvas({
 }: MapCanvasProps) {
   const index = useAtdFilterIndex(filtersUrl);
   const { selection, ready, onChange } = useAtdFilterRoute(index);
+  const [basemap, setBasemap] = useState<TileLayerId>("osm");
 
   return (
-    <MapLibreMap ariaLabel={MAP_ARIA_LABEL} workerUrl={workerUrl}>
+    <MapLibreMap
+      ariaLabel={MAP_ARIA_LABEL}
+      workerUrl={workerUrl}
+      basemap={basemap}
+      onBasemapChange={setBasemap}
+    >
       <FreeMapBounds />
+      <BasemapSelect value={basemap} onChange={setBasemap} />
       <PlacesFilterPanel index={index} value={selection} onChange={onChange} />
       <PlacesClusterLayer
         dataUrl={placesUrl}
