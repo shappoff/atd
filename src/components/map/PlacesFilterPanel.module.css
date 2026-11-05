@@ -1,0 +1,45 @@
+.panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 510;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sui-space-2);
+  padding: calc(var(--sui-space-2) + env(safe-area-inset-top, 0px))
+    calc(var(--sui-space-3) + env(safe-area-inset-right, 0px))
+    var(--sui-space-2) calc(var(--sui-space-3) + env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--sui-color-fg) 10%, transparent);
+  background: color-mix(in srgb, var(--sui-color-bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 1px 8px color-mix(in srgb, var(--sui-color-fg) 10%, transparent);
+  pointer-events: auto;
+}
+
+@media (max-width: 40rem) {
+  .panel {
+    display: flex;
+    gap: var(--sui-space-2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .panel > * {
+    flex: 0 0 min(72vw, 15.5rem);
+  }
+}
+
+@media (min-width: 40rem) {
+  .panel {
+    right: 6.75rem;
+  }
+}
