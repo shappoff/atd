@@ -48,13 +48,18 @@ function asFiniteNumber(value: unknown): number | null {
 }
 
 function asNullableNumber(value: unknown): number | null | undefined {
-  if (value === null) {
+  // Realtime Database omits null, so a missing coordinate is an empty one.
+  if (value == null) {
     return null;
   }
   return asFiniteNumber(value) ?? undefined;
 }
 
 function asStringRecord(value: unknown): Record<string, string> | null {
+  // Realtime Database omits {}, so a missing year map is an empty one.
+  if (value == null) {
+    return {};
+  }
   if (!isRecord(value)) {
     return null;
   }

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@firebase/app": "0.16.5",
     "@shappoff/ui": "^0.2.9",
     "firebase": "^12.19.0",
     "firebase-admin": "^13.10.0",
