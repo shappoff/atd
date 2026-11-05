@@ -146,6 +146,134 @@ function OwnerField({ value }: { value: string }) {
   );
 }
 
+function CopyIcon() {
+  return (
+    <svg className={styles.copyIcon} viewBox="0 0 16 16" aria-hidden="true">
+      <rect
+        x="5.25"
+        y="5.25"
+        width="8"
+        height="8"
+        rx="1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M10.75 5.25V3.25a1 1 0 0 0-1-1h-6.5a1 1 0 0 0-1 1v6.5a1 1 0 0 0 1 1h2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg className={styles.copyIcon} viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d="M3.5 8.5 6.5 11.5 12.5 4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CoordinatesField({ value }: { value: string }) {
+  const [copyState, setCopyState] = useState<{
+    value: string;
+    tick: number;
+  } | null>(null);
+  if (copyState && copyState.value !== value) {
+    setCopyState(null);
+  }
+  const copied = copyState?.value === value;
+
+  useEffect(() => {
+    if (copyState == null) {
+      return;
+    }
+    const timer = window.setTimeout(() => setCopyState(null), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copyState]);
+
+  if (!value.trim()) {
+    return null;
+  }
+
+  function markCopied() {
+    setCopyState((current) => ({
+      value,
+      tick: (current?.tick ?? 0) + 1,
+    }));
+  }
+
+  function copyWithSelection(): boolean {
+    const area = document.createElement("textarea");
+    area.value = value;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "0";
+    area.style.left = "0";
+    area.style.opacity = "0";
+    document.body.append(area);
+    const previous = document.activeElement;
+    area.focus();
+    area.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch {
+      ok = false;
+    }
+    area.remove();
+    if (previous instanceof HTMLElement) {
+      previous.focus();
+    }
+    return ok;
+  }
+
+  async function copyCoordinates() {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+        markCopied();
+        return;
+      }
+    } catch {
+      // The clipboard API can reject even after a click. Fall back below.
+    }
+    if (copyWithSelection()) {
+      markCopied();
+    }
+  }
+
+  return (
+    <Field label="Координаты">
+      <div className={styles.coordinates}>
+        <p className={styles.value}>{value}</p>
+        <button
+          type="button"
+          className={copied ? `${styles.copy} ${styles.copyDone}` : styles.copy}
+          onClick={() => {
+            void copyCoordinates();
+          }}
+        >
+          {copied ? <CheckIcon /> : <CopyIcon />}
+          <span className={copied ? undefined : styles.visuallyHidden}>
+            {copied ? "Скопировано" : "Скопировать в буфер обмена"}
+          </span>
+        </button>
+      </div>
+    </Field>
+  );
+}
+
 function TextField({ label, value }: { label: string; value: string }) {
   if (!value.trim()) {
     return null;
@@ -218,7 +346,7 @@ function PlaceFacts({ place }: { place: PlaceDetails }) {
       <TextField label="Костёл" value={place.kostel} />
       <YearFields label="Епархия" records={place.eparchy} />
       <YearFields label="Административное деление" records={place.atd} />
-      <TextField label="Координаты" value={coordinates(place)} />
+      <CoordinatesField value={coordinates(place)} />
       <LinkField value={place.link} />
     </div>
   );
