@@ -1,4 +1,4 @@
-import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { cert, deleteApp, getApps, initializeApp } from "firebase-admin/app";
 import { type Database, getDatabase } from "firebase-admin/database";
 
 function requireEnv(name: string): string {
@@ -23,4 +23,8 @@ export function getPlacesDatabase(): Database {
   }
 
   return getDatabase();
+}
+
+export async function closePlacesDatabase(): Promise<void> {
+  await Promise.all(getApps().map((app) => deleteApp(app)));
 }

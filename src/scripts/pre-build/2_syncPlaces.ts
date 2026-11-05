@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getPlacesDatabase } from "@/prebuild/firebaseAdmin";
+import {
+  closePlacesDatabase,
+  getPlacesDatabase,
+} from "@/prebuild/firebaseAdmin";
 import { syncPlaceDetails } from "@/prebuild/syncPlaces";
 import type { PlaceItem } from "@/prebuild/types";
 
@@ -29,13 +32,17 @@ export default async function syncPlaces(): Promise<void> {
     return;
   }
 
-  getPlacesDatabase();
-  const places = readPlaces(JSON.parse(fs.readFileSync(jsonPath, "utf8")));
-  const updated = await syncPlaceDetails(places);
-  if (updated === 0) {
-    console.log("Place details in Realtime Database are unchanged");
-    return;
-  }
+  try {
+    getPlacesDatabase();
+    const places = readPlaces(JSON.parse(fs.readFileSync(jsonPath, "utf8")));
+    const updated = await syncPlaceDetails(places);
+    if (updated === 0) {
+      console.log("Place details in Realtime Database are unchanged");
+      return;
+    }
 
-  console.log(`Updated ${updated} places in Realtime Database`);
+    console.log(`Updated ${updated} places in Realtime Database`);
+  } finally {
+    await closePlacesDatabase();
+  }
 }
