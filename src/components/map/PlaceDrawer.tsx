@@ -62,6 +62,30 @@ function withoutYearPrefix(year: string, value: string): string {
   return value.startsWith(prefix) ? value.slice(prefix.length).trim() : value;
 }
 
+const OWNER_YEAR = /^(\d*?)((?:1[7-9]|20)\d{2}):([\s\S]*)$/;
+
+function ownerRecord(value: string): { year: string; name: string } | null {
+  const trimmed = value.trim();
+  const match = trimmed.match(OWNER_YEAR);
+  if (!match) {
+    const name = trimmed.replace(/^:/, "").replace(/\s+/g, " ").trim();
+    return name ? { year: "", name } : null;
+  }
+
+  const year = match[2] ?? "";
+  const name = (match[3] ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(new RegExp(`\\(${year}\\s+год\\)$`), "")
+    .trim();
+
+  if (!year && !name) {
+    return null;
+  }
+
+  return { year, name };
+}
+
 function coordinates(place: PlaceDetails): string {
   if (place.lat == null || place.lng == null) {
     return "";
@@ -96,6 +120,29 @@ function TextValue({ value }: { value: string }) {
         return <li key={key}>{part}</li>;
       })}
     </ul>
+  );
+}
+
+function OwnerField({ value }: { value: string }) {
+  const record = ownerRecord(value);
+  if (!record) {
+    return null;
+  }
+  if (!record.year) {
+    return (
+      <Field label="Владелец">
+        <p className={styles.value}>{record.name}</p>
+      </Field>
+    );
+  }
+
+  return (
+    <Field label="Владелец">
+      <div className={styles.owner}>
+        <span className={styles.ownerYear}>{record.year}</span>
+        {record.name ? <p className={styles.value}>{record.name}</p> : null}
+      </div>
+    </Field>
   );
 }
 
@@ -167,7 +214,7 @@ function LinkField({ value }: { value: string }) {
 function PlaceFacts({ place }: { place: PlaceDetails }) {
   return (
     <div className={styles.fields}>
-      <TextField label="Владелец" value={place.owner} />
+      <OwnerField value={place.owner} />
       <TextField label="Костёл" value={place.kostel} />
       <YearFields label="Епархия" records={place.eparchy} />
       <YearFields label="Административное деление" records={place.atd} />
