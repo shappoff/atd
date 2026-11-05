@@ -1,4 +1,6 @@
-import { getApps, initializeApp } from "firebase/app";
+// firebase/database registers on the hoisted @firebase/app.
+// The firebase/app entry loads a second, nested copy.
+import { getApps, initializeApp } from "@firebase/app";
 import { type Database, getDatabase } from "firebase/database";
 
 function requireEnv(name: string, value: string | undefined): string {
