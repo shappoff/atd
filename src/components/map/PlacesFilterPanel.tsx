@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   type AtdFilterIndex,
   type AtdFilterSelection,
@@ -16,11 +16,14 @@ type PlacesFilterPanelProps = {
   onChange: (value: AtdFilterSelection) => void;
 };
 
+const FILTER_PANEL_OFFSET_VAR = "--atd-filter-panel-offset";
+
 export function PlacesFilterPanel({
   filtersUrl,
   value,
   onChange,
 }: PlacesFilterPanelProps) {
+  const panelRef = useRef<HTMLFormElement>(null);
   const [index, setIndex] = useState<AtdFilterIndex | null>(null);
 
   useEffect(() => {
@@ -54,6 +57,30 @@ export function PlacesFilterPanel({
     };
   }, [filtersUrl]);
 
+  useEffect(() => {
+    const panel = panelRef.current;
+    const mapRoot = panel?.closest(".sui-map");
+    if (!(panel instanceof HTMLElement) || !(mapRoot instanceof HTMLElement)) {
+      return;
+    }
+
+    const syncOffset = () => {
+      mapRoot.style.setProperty(
+        FILTER_PANEL_OFFSET_VAR,
+        `${panel.getBoundingClientRect().height}px`,
+      );
+    };
+
+    syncOffset();
+    const observer = new ResizeObserver(syncOffset);
+    observer.observe(panel);
+
+    return () => {
+      observer.disconnect();
+      mapRoot.style.removeProperty(FILTER_PANEL_OFFSET_VAR);
+    };
+  }, []);
+
   const options = atdFilterOptions(index ?? { paths: [] }, value);
   const disabled = index == null;
 
@@ -67,6 +94,7 @@ export function PlacesFilterPanel({
 
   return (
     <form
+      ref={panelRef}
       className={styles.panel}
       aria-label="Фильтры административного деления"
       onSubmit={(event) => event.preventDefault()}
