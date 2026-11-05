@@ -9,7 +9,9 @@ import {
 import type { PlacesGeoJson } from "@/prebuild/placesGeoJson";
 import { filterPlacesGeoJson } from "./filterPlacesGeoJson";
 import { loadPlaceDetails } from "./loadPlaceDetails";
+import { readPlacesGeoJson } from "./loadPlacesGeoJson";
 import { PlaceDrawer, type PlaceDrawerState } from "./PlaceDrawer";
+import { PlacesLoadProgress } from "./PlacesLoadProgress";
 import {
   attachPlacesClusterInteractions,
   framePlaces,
@@ -33,31 +35,36 @@ export function PlacesClusterLayer({
   const [open, setOpen] = useState(false);
   const [place, setPlace] = useState<PlaceDrawerState | null>(null);
   const [geojson, setGeojson] = useState<PlacesGeoJson | null>(null);
+  const [progress, setProgress] = useState<number | null>(null);
   const framedFilter = useRef<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     let alive = true;
 
-    void fetch(dataUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load places: ${response.status}`);
-        }
-        return response.json() as Promise<PlacesGeoJson>;
-      })
-      .then((data) => {
+    readPlacesGeoJson(dataUrl, controller.signal, (value) => {
+      if (alive) {
+        setProgress(value);
+      }
+    })
+      .then(async (data) => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 4000);
+        });
         if (alive) {
           setGeojson(data);
         }
       })
-      .catch(() => {
-        if (alive) {
-          setGeojson({ type: "FeatureCollection", features: [] });
+      .catch((error: unknown) => {
+        if (!alive || isAbortError(error)) {
+          return;
         }
+        setGeojson({ type: "FeatureCollection", features: [] });
       });
 
     return () => {
       alive = false;
+      controller.abort();
     };
   }, [dataUrl]);
 
@@ -132,15 +139,22 @@ export function PlacesClusterLayer({
   }, [active, map, geojson, filter]);
 
   return (
-    <PlaceDrawer
-      open={open}
-      place={place}
-      onOpenChange={setOpen}
-      onOpenChangeComplete={(next) => {
-        if (!next) {
-          setPlace(null);
-        }
-      }}
-    />
+    <>
+      {geojson == null ? <PlacesLoadProgress value={progress} /> : null}
+      <PlaceDrawer
+        open={open}
+        place={place}
+        onOpenChange={setOpen}
+        onOpenChangeComplete={(next) => {
+          if (!next) {
+            setPlace(null);
+          }
+        }}
+      />
+    </>
   );
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }
