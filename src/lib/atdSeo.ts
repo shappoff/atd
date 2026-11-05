@@ -7,6 +7,7 @@ import {
 } from "@/lib/atdData";
 import { atdSelectionFromPathname, atdSelectionPath } from "@/lib/atdRoute";
 import { absoluteUrl } from "@/lib/paths";
+import { ROOT_TITLE, routeTitle } from "@/lib/siteTitle";
 import {
   ATD_LEVELS,
   type AtdFilterSelection,
@@ -17,7 +18,6 @@ import {
   pathMatchesSelection,
 } from "@/prebuild/atdHierarchy";
 
-const ROOT_TITLE = "Административно-территориальное деление";
 const UNTITLED_PLACE_TYPE = "тип не указан";
 
 const LIST_HEADING: Record<AtdLevel | "place", string> = {
@@ -51,13 +51,13 @@ export function atdPageMetadata(segments: readonly string[]): Metadata {
     selectionFromSegments(segments),
     getAtdSlugLookup(),
   );
+  const title = routeTitle(document.title, segments.length === 0);
   return {
-    title:
-      segments.length === 0 ? { absolute: document.title } : document.title,
+    title: { absolute: title },
     description: document.description,
     alternates: { canonical: path },
     openGraph: {
-      title: document.title,
+      title,
       description: document.description,
       url: path,
     },
