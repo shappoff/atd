@@ -47,10 +47,7 @@ export function PlacesClusterLayer({
         setProgress(value);
       }
     })
-      .then(async (data) => {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 4000);
-        });
+      .then((data) => {
         if (alive) {
           setGeojson(data);
         }

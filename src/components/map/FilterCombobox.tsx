@@ -11,8 +11,7 @@ import {
 } from "@shappoff/ui";
 import { useEffect, useId, useRef, useState } from "react";
 import styles from "./FilterCombobox.module.css";
-
-const NARROW_VIEWPORT_QUERY = "(max-width: 40rem)";
+import { useNarrowViewport } from "./useNarrowViewport";
 
 type FilterComboboxProps = {
   label: string;
@@ -21,26 +20,6 @@ type FilterComboboxProps = {
   onValueChange: (value: string | null) => void;
   disabled?: boolean;
 };
-
-function useNarrowViewport(): boolean {
-  const [narrow, setNarrow] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia(NARROW_VIEWPORT_QUERY).matches,
-  );
-
-  useEffect(() => {
-    const media = window.matchMedia(NARROW_VIEWPORT_QUERY);
-    const sync = () => {
-      setNarrow(media.matches);
-    };
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
-
-  return narrow;
-}
 
 function CheckIcon() {
   return (
