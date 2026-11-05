@@ -33,7 +33,7 @@ export function PlacesClusterLayer({
   const [open, setOpen] = useState(false);
   const [place, setPlace] = useState<PlaceDrawerState | null>(null);
   const [geojson, setGeojson] = useState<PlacesGeoJson | null>(null);
-  const framed = useRef(false);
+  const framedFilter = useRef<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -118,11 +118,17 @@ export function PlacesClusterLayer({
     }
     const places = filterPlacesGeoJson(geojson, filter);
     setPlacesClusterData(map, places);
-    if (!hasAtdFilterSelection(filter) && !framed.current) {
+
+    const key = [filter.gubernia, filter.uezd, filter.volost].join("\0");
+    if (framedFilter.current === key) {
       return;
     }
+    if (!hasAtdFilterSelection(filter) && framedFilter.current == null) {
+      framedFilter.current = key;
+      return;
+    }
+    framedFilter.current = key;
     framePlaces(map, places);
-    framed.current = true;
   }, [active, map, geojson, filter]);
 
   return (

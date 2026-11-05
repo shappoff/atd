@@ -16,7 +16,6 @@ const NARROW_VIEWPORT_QUERY = "(max-width: 40rem)";
 
 type FilterComboboxProps = {
   label: string;
-  placeholder: string;
   items: string[];
   value: string | null;
   onValueChange: (value: string | null) => void;
@@ -96,14 +95,11 @@ function ClearIcon() {
 
 function FilterComboboxPopup({
   label,
-  placeholder,
   items,
   value,
   onValueChange,
   disabled = false,
 }: FilterComboboxProps) {
-  const id = useId();
-
   return (
     <Combobox.Root
       items={items}
@@ -114,33 +110,28 @@ function FilterComboboxPopup({
       disabled={disabled}
       modal={false}
     >
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor={id}>
-          {label}
-        </label>
-        <Combobox.InputGroup className={styles.inputGroup}>
-          <Combobox.Input
-            id={id}
-            className={styles.input}
-            placeholder={placeholder}
-            autoComplete="off"
-          />
-          <div className={styles.actions}>
-            <Combobox.Clear
-              className={styles.clear}
-              aria-label={`Сбросить фильтр «${label}»`}
-            >
-              <ClearIcon />
-            </Combobox.Clear>
-            <Combobox.Trigger
-              className={styles.trigger}
-              aria-label={`Открыть список «${label}»`}
-            >
-              <CaretIcon />
-            </Combobox.Trigger>
-          </div>
-        </Combobox.InputGroup>
-      </div>
+      <Combobox.InputGroup className={styles.inputGroup}>
+        <Combobox.Input
+          className={styles.input}
+          placeholder={label}
+          aria-label={label}
+          autoComplete="off"
+        />
+        <div className={styles.actions}>
+          <Combobox.Clear
+            className={styles.clear}
+            aria-label={`Сбросить фильтр «${label}»`}
+          >
+            <ClearIcon />
+          </Combobox.Clear>
+          <Combobox.Trigger
+            className={styles.trigger}
+            aria-label={`Открыть список «${label}»`}
+          >
+            <CaretIcon />
+          </Combobox.Trigger>
+        </div>
+      </Combobox.InputGroup>
 
       <Combobox.Portal>
         <Combobox.Positioner
@@ -171,13 +162,11 @@ function FilterComboboxPopup({
 
 function FilterOptionDrawer({
   label,
-  placeholder,
   items,
   value,
   onValueChange,
   disabled = false,
 }: FilterComboboxProps) {
-  const labelId = useId();
   const searchId = useId();
   const selectedRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -210,22 +199,19 @@ function FilterOptionDrawer({
   }
 
   return (
-    <div className={styles.field}>
-      <span className={styles.label} id={labelId}>
-        {label}
-      </span>
+    <>
       <div className={styles.inputGroup}>
         <button
           type="button"
           className={styles.open}
-          aria-labelledby={labelId}
+          aria-label={label}
           aria-haspopup="dialog"
           aria-expanded={open}
           disabled={disabled}
           onClick={() => setOpen(true)}
         >
           <span className={value ? styles.valueText : styles.placeholder}>
-            {value ?? placeholder}
+            {value ?? label}
           </span>
         </button>
         <div className={styles.actions}>
@@ -312,7 +298,7 @@ function FilterOptionDrawer({
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-    </div>
+    </>
   );
 }
 
