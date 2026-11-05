@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "places": {
+      ".read": true,
+      ".write": false
+    },
+    "placeRevisions": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
