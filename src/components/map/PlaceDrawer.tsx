@@ -377,26 +377,6 @@ function EparchyValue({ value }: { value: string }) {
   );
 }
 
-const PUBLIC_ATD_YEARS = new Set(["1870", "1906", "1908", "1909", "1910"]);
-
-function isDebugEnabled(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  return new URLSearchParams(window.location.search).get("debug") === "true";
-}
-
-function visibleAtdRecords(
-  records: Record<string, string>,
-): Record<string, string> {
-  if (isDebugEnabled()) {
-    return records;
-  }
-  return Object.fromEntries(
-    Object.entries(records).filter(([year]) => PUBLIC_ATD_YEARS.has(year)),
-  );
-}
-
 function YearFields({
   label,
   records,
@@ -430,9 +410,16 @@ function YearFields({
   );
 }
 
+function isDebugLinkEnabled(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return new URLSearchParams(window.location.search).get("debug") === "true";
+}
+
 function LinkField({ value }: { value: string }) {
   const href = httpHref(value);
-  if (!isDebugEnabled() || !href) {
+  if (!isDebugLinkEnabled() || !href) {
     return null;
   }
   return (
@@ -459,10 +446,7 @@ function PlaceFacts({ place }: { place: PlaceDetails }) {
         records={place.eparchy}
         renderValue={(value) => <EparchyValue value={value} />}
       />
-      <YearFields
-        label="Административное деление"
-        records={visibleAtdRecords(place.atd)}
-      />
+      <YearFields label="Административное деление" records={place.atd} />
       <CoordinatesField value={coordinates(place)} />
       <LinkField value={place.link} />
     </div>
