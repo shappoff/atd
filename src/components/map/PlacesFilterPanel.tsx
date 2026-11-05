@@ -19,9 +19,6 @@ type PlacesFilterPanelProps = {
 };
 
 const FILTER_PANEL_OFFSET_VAR = "--atd-filter-panel-offset";
-const FILTER_FAB_GAP_VAR = "--atd-filter-fab-gap";
-/** Space for the floating filter button so the basemap switcher sits below it. */
-const FILTER_FAB_GAP = "2.75rem";
 
 function FilterIcon() {
   return (
@@ -87,17 +84,12 @@ export function PlacesFilterPanel({
     const syncOffset = () => {
       const height = showPanel ? panel.offsetHeight : 0;
       mapRoot.style.setProperty(FILTER_PANEL_OFFSET_VAR, `${height}px`);
-      mapRoot.style.setProperty(
-        FILTER_FAB_GAP_VAR,
-        narrow && !open ? FILTER_FAB_GAP : "0px",
-      );
     };
 
     syncOffset();
     if (!showPanel) {
       return () => {
         mapRoot.style.removeProperty(FILTER_PANEL_OFFSET_VAR);
-        mapRoot.style.removeProperty(FILTER_FAB_GAP_VAR);
       };
     }
 
@@ -107,9 +99,8 @@ export function PlacesFilterPanel({
     return () => {
       observer.disconnect();
       mapRoot.style.removeProperty(FILTER_PANEL_OFFSET_VAR);
-      mapRoot.style.removeProperty(FILTER_FAB_GAP_VAR);
     };
-  }, [narrow, open, showPanel]);
+  }, [showPanel]);
 
   const options = atdFilterOptions(index ?? { paths: [] }, value);
   const disabled = index == null;

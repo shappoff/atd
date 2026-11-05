@@ -105,11 +105,9 @@
 }
 
 :global(.sui-map__switcher) {
-  top: calc(
-    var(--atd-filter-panel-offset, 0px) +
-    var(--atd-filter-fab-gap, 0px) +
-    0.75rem
-  );
+  top: calc(var(--atd-filter-panel-offset, 0px) + 0.75rem);
+  right: auto;
+  left: calc(0.75rem + env(safe-area-inset-left, 0px));
 }
 
 @media (prefers-reduced-motion: reduce) {
