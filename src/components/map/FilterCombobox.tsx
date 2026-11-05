@@ -1,8 +1,18 @@
 "use client";
 
 import { Combobox } from "@base-ui/react/combobox";
-import { useId } from "react";
+import {
+  Drawer,
+  DrawerBody,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@shappoff/ui";
+import { useEffect, useId, useRef, useState } from "react";
 import styles from "./FilterCombobox.module.css";
+
+const NARROW_VIEWPORT_QUERY = "(max-width: 40rem)";
 
 type FilterComboboxProps = {
   label: string;
@@ -12,6 +22,26 @@ type FilterComboboxProps = {
   onValueChange: (value: string | null) => void;
   disabled?: boolean;
 };
+
+function useNarrowViewport(): boolean {
+  const [narrow, setNarrow] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia(NARROW_VIEWPORT_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia(NARROW_VIEWPORT_QUERY);
+    const sync = () => {
+      setNarrow(media.matches);
+    };
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  return narrow;
+}
 
 function CheckIcon() {
   return (
@@ -64,7 +94,7 @@ function ClearIcon() {
   );
 }
 
-export function FilterCombobox({
+function FilterComboboxPopup({
   label,
   placeholder,
   items,
@@ -137,4 +167,159 @@ export function FilterCombobox({
       </Combobox.Portal>
     </Combobox.Root>
   );
+}
+
+function FilterOptionDrawer({
+  label,
+  placeholder,
+  items,
+  value,
+  onValueChange,
+  disabled = false,
+}: FilterComboboxProps) {
+  const labelId = useId();
+  const searchId = useId();
+  const selectedRef = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    selectedRef.current?.scrollIntoView({ block: "nearest" });
+  }, [open]);
+
+  const normalizedQuery = query.trim().toLocaleLowerCase("ru");
+  const visibleItems = normalizedQuery
+    ? items.filter((item) =>
+        item.toLocaleLowerCase("ru").includes(normalizedQuery),
+      )
+    : items;
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (!next) {
+      setQuery("");
+    }
+  }
+
+  function choose(next: string | null) {
+    onValueChange(next);
+    handleOpenChange(false);
+  }
+
+  return (
+    <div className={styles.field}>
+      <span className={styles.label} id={labelId}>
+        {label}
+      </span>
+      <div className={styles.inputGroup}>
+        <button
+          type="button"
+          className={styles.open}
+          aria-labelledby={labelId}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          disabled={disabled}
+          onClick={() => setOpen(true)}
+        >
+          <span className={value ? styles.valueText : styles.placeholder}>
+            {value ?? placeholder}
+          </span>
+        </button>
+        <div className={styles.actions}>
+          {value ? (
+            <button
+              type="button"
+              className={styles.clear}
+              data-visible=""
+              aria-label={`Сбросить фильтр «${label}»`}
+              disabled={disabled}
+              onClick={() => onValueChange(null)}
+            >
+              <ClearIcon />
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className={styles.trigger}
+            aria-label={`Открыть список «${label}»`}
+            disabled={disabled}
+            onClick={() => setOpen(true)}
+          >
+            <CaretIcon />
+          </button>
+        </div>
+      </div>
+
+      <Drawer
+        open={open}
+        onOpenChange={handleOpenChange}
+        modal
+        swipeDirection="down"
+        showSwipeHandle
+      >
+        <DrawerContent>
+          <DrawerHeader>
+            <div className={styles.drawerHeading}>
+              <DrawerTitle className={styles.drawerTitle}>{label}</DrawerTitle>
+              <DrawerClose className={styles.drawerClose} aria-label="Закрыть">
+                ×
+              </DrawerClose>
+            </div>
+            <input
+              id={searchId}
+              className={styles.search}
+              value={query}
+              placeholder="Поиск"
+              aria-label={`Поиск: ${label}`}
+              autoComplete="off"
+              disabled={disabled}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </DrawerHeader>
+          <DrawerBody>
+            {visibleItems.length === 0 ? (
+              <p className={styles.empty}>Ничего не найдено</p>
+            ) : (
+              <div className={styles.list} role="listbox" aria-label={label}>
+                {visibleItems.map((item) => {
+                  const selected = item === value;
+                  return (
+                    <button
+                      key={item}
+                      ref={selected ? selectedRef : undefined}
+                      type="button"
+                      role="option"
+                      className={styles.item}
+                      aria-selected={selected}
+                      data-selected={selected ? "" : undefined}
+                      onClick={() => choose(item)}
+                    >
+                      <span
+                        className={styles.indicator}
+                        data-selected={selected ? "" : undefined}
+                      >
+                        <CheckIcon />
+                      </span>
+                      <span className={styles.itemText}>{item}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  );
+}
+
+export function FilterCombobox(props: FilterComboboxProps) {
+  const narrow = useNarrowViewport();
+  if (narrow) {
+    return <FilterOptionDrawer {...props} />;
+  }
+  return <FilterComboboxPopup {...props} />;
 }
