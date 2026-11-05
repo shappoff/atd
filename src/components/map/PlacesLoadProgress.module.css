@@ -1,0 +1,46 @@
+.root {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 500;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  pointer-events: none;
+}
+
+.track {
+  height: 0.5rem;
+  overflow: hidden;
+  background: var(--sui-color-bg);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--sui-color-fg) 14%, transparent);
+}
+
+.indicator {
+  height: 100%;
+  background: var(--sui-color-primary);
+  transition: width 120ms linear;
+}
+
+.indicator[data-indeterminate] {
+  width: 35%;
+  transition: none;
+  animation: places-load-slide 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator[data-indeterminate] {
+    width: 100%;
+    animation: none;
+    opacity: 0.85;
+  }
+}
+
+@keyframes places-load-slide {
+  from {
+    transform: translateX(-120%);
+  }
+
+  to {
+    transform: translateX(320%);
+  }
+}
