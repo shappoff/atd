@@ -12,30 +12,19 @@
     var(--sui-space-2) calc(var(--sui-space-3) + env(safe-area-inset-left, 0px));
   border-bottom: 1px solid
     color-mix(in srgb, var(--sui-color-fg) 10%, transparent);
-  background: color-mix(in srgb, var(--sui-color-bg) 88%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 1px 8px color-mix(in srgb, var(--sui-color-fg) 10%, transparent);
+  background: var(--sui-color-bg);
   pointer-events: auto;
 }
 
 @media (max-width: 40rem) {
   .panel {
-    display: flex;
-    gap: var(--sui-space-2);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    grid-template-columns: minmax(0, 1fr);
   }
+}
 
-  .panel::-webkit-scrollbar {
-    display: none;
-  }
-
-  .panel > * {
-    flex: 0 0 min(72vw, 15.5rem);
-  }
+:global(.sui-map.sui-map--maplibre) :global(.sui-map__canvas) {
+  top: var(--atd-filter-panel-offset, 0px);
+  height: auto;
 }
 
 :global(.sui-map__switcher) {
