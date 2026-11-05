@@ -2,9 +2,9 @@ export const ATD_FILTERS_PUBLIC_PATH = "/atdFilters.json";
 export const ATD_PLACES_PUBLIC_PATH = "/atdPlaces.geojson";
 
 const basePath = process.env.PAGES_BASE_PATH ?? "";
-const siteOrigin = (
-  process.env.SITE_ORIGIN ?? "https://shappoff.github.io"
-).replace(/\/+$/, "");
+const publicSite = new URL(
+  `${(process.env.SITE_ORIGIN ?? "https://shappoff.github.io/atd").replace(/\/+$/, "")}/`,
+);
 
 export function withBasePath(path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
@@ -12,7 +12,6 @@ export function withBasePath(path: string): string {
 }
 
 export function absoluteUrl(path: string): string {
-  return new URL(withBasePath(path), `${siteOrigin}/`).href;
+  const relative = path.startsWith("/") ? path.slice(1) : path;
+  return new URL(relative, publicSite).href;
 }
-
-export const SITE_ORIGIN = siteOrigin;
