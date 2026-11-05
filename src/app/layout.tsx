@@ -30,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <MapView
               workerUrl={withBasePath("/maplibre/maplibre-gl-worker.mjs")}
               placesUrl={withBasePath("/atdPlaces.geojson")}
+              filtersUrl={withBasePath("/atdFilters.json")}
             />
           </div>
           <div className={styles.content}>{children}</div>

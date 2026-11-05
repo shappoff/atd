@@ -4,7 +4,7 @@ import {
   hasGoogleSheetsCredentials,
   toSheetRange,
 } from "@/prebuild/gsheets";
-import { persistPlaces } from "@/prebuild/persist";
+import { persistPlaces, readPersistedPlaces } from "@/prebuild/persist";
 import { processPlaceRows } from "@/prebuild/pipeline";
 import {
   ATD_PLACES_RANGE,
@@ -33,6 +33,19 @@ export default async function extractSpreadsheetData() {
   console.log("Google sheets pre-build data update");
 
   if (!requireCredentials()) {
+    const existing = readPersistedPlaces();
+    if (!existing) {
+      console.warn("No existing public/atdPlaces.json to refresh.");
+      return;
+    }
+    const result = persistPlaces(existing);
+    console.log(`Refreshed ${existing.length} places to ${result.jsonPath}`);
+    console.log(
+      `Saved ${result.featureCount} map features to ${result.geojsonPath}`,
+    );
+    console.log(
+      `Saved ${result.filterPathCount} filter paths to ${result.filtersPath}`,
+    );
     return;
   }
 
@@ -46,8 +59,13 @@ export default async function extractSpreadsheetData() {
     spreadsheetId: ATD_PLACES_SPREADSHEET_ID,
     gid: meta.gid,
   });
-  const { jsonPath, geojsonPath, featureCount } = persistPlaces(places);
+  const result = persistPlaces(places);
 
-  console.log(`Saved ${places.length} places to ${jsonPath}`);
-  console.log(`Saved ${featureCount} map features to ${geojsonPath}`);
+  console.log(`Saved ${places.length} places to ${result.jsonPath}`);
+  console.log(
+    `Saved ${result.featureCount} map features to ${result.geojsonPath}`,
+  );
+  console.log(
+    `Saved ${result.filterPathCount} filter paths to ${result.filtersPath}`,
+  );
 }

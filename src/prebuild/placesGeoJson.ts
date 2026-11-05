@@ -1,8 +1,10 @@
+import { collectAtdPaths, pathKey } from "./atdHierarchy";
 import type { PlaceItem } from "./types";
 
 export type PlaceFeatureProperties = {
   title: string;
   type: string;
+  paths?: string[];
 };
 
 export type PlaceFeature = {
@@ -39,6 +41,7 @@ export function toPlacesGeoJson(places: PlaceItem[]): PlacesGeoJson {
       continue;
     }
 
+    const paths = collectAtdPaths(place.atd).map(pathKey);
     features.push({
       type: "Feature",
       id: place.row,
@@ -49,6 +52,7 @@ export function toPlacesGeoJson(places: PlaceItem[]): PlacesGeoJson {
       properties: {
         title: place.title,
         type: place.type,
+        ...(paths.length > 0 ? { paths } : {}),
       },
     });
   }

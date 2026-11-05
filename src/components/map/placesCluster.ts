@@ -6,6 +6,7 @@ import {
   Popup as MapLibrePopup,
   type Popup,
 } from "maplibre-gl";
+import type { PlacesGeoJson } from "@/prebuild/placesGeoJson";
 
 export const PLACES_SOURCE_ID = "atd-places";
 export const PLACES_CLUSTER_LAYER_ID = "atd-places-clusters";
@@ -58,21 +59,26 @@ function popupHtml(feature: MapGeoJSONFeature): string {
   return `<p class="sui-map-marker__popup-description">${escapeHtml(type)}</p>${titleHtml}`;
 }
 
-function placesSource(dataUrl: string) {
+type PlacesSourceData = string | PlacesGeoJson;
+
+function placesSource(data: PlacesSourceData) {
   return {
     type: "geojson" as const,
-    data: dataUrl,
+    data,
     cluster: false,
     clusterMaxZoom: CLUSTER_MAX_ZOOM,
     clusterRadius: CLUSTER_RADIUS,
   };
 }
 
-export function mountPlacesCluster(map: MapLibreGlMap, dataUrl: string): void {
+export function mountPlacesCluster(
+  map: MapLibreGlMap,
+  data: PlacesSourceData,
+): void {
   map.setGlyphs(GLYPHS_URL);
 
   if (!map.getSource(PLACES_SOURCE_ID)) {
-    map.addSource(PLACES_SOURCE_ID, placesSource(dataUrl));
+    map.addSource(PLACES_SOURCE_ID, placesSource(data));
   }
 
   const primary = themeColor("--sui-color-primary", FALLBACK_PRIMARY);
@@ -168,6 +174,17 @@ function placesGeoJsonSource(map: MapLibreGlMap): GeoJSONSource | null {
     return null;
   }
   return source;
+}
+
+export function setPlacesClusterData(
+  map: MapLibreGlMap,
+  data: PlacesSourceData,
+): void {
+  const source = placesGeoJsonSource(map);
+  if (!source) {
+    return;
+  }
+  source.setData(data);
 }
 
 function placeHit(feature: MapGeoJSONFeature): PlaceHit | null {
