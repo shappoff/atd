@@ -34,6 +34,7 @@ type FilterFieldsProps = {
   value: AtdFilterSelection;
   onChange: (value: AtdFilterSelection) => void;
   onCleared?: () => void;
+  clearMode: "icon" | "text";
 };
 
 function FilterIcon() {
@@ -55,11 +56,32 @@ function FilterIcon() {
   );
 }
 
+function ClearFiltersIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M5.75 5.75 10.25 10.25M10.25 5.75 5.75 10.25"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function PlacesFilterFields({
   index,
   value,
   onChange,
   onCleared,
+  clearMode,
 }: FilterFieldsProps) {
   const options = atdFilterOptions(index ?? { paths: [] }, value);
   const disabled = index == null;
@@ -119,11 +141,15 @@ function PlacesFilterFields({
       {filtersActive ? (
         <button
           type="button"
-          className={styles.clearAll}
+          className={
+            clearMode === "icon" ? styles.clearAllIcon : styles.clearAll
+          }
           disabled={disabled}
+          aria-label="Очистить все фильтры"
+          title="Очистить все фильтры"
           onClick={clearAll}
         >
-          Очистить все фильтры
+          {clearMode === "icon" ? <ClearFiltersIcon /> : "Очистить все фильтры"}
         </button>
       ) : null}
     </>
@@ -164,7 +190,12 @@ function PlacesFilterBar({ index, value, onChange }: PlacesFilterPanelProps) {
       aria-label="Фильтры административного деления"
       onSubmit={(event) => event.preventDefault()}
     >
-      <PlacesFilterFields index={index} value={value} onChange={onChange} />
+      <PlacesFilterFields
+        index={index}
+        value={value}
+        onChange={onChange}
+        clearMode="icon"
+      />
     </form>
   );
 }
@@ -224,6 +255,7 @@ function PlacesFilterDrawer({
                 value={value}
                 onChange={onChange}
                 onCleared={() => setOpen(false)}
+                clearMode="text"
               />
             </form>
           </DrawerBody>
