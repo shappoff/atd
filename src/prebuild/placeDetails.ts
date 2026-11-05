@@ -1,6 +1,6 @@
 import type { PlaceItem } from "./types";
 
-export const PLACE_SHARD_SIZE = 200;
+export const PLACES_PATH = "places";
 
 export type PlaceDetails = Pick<
   PlaceItem,
@@ -16,8 +16,8 @@ export type PlaceDetails = Pick<
   | "atd"
 >;
 
-export function placeShardName(row: number): string {
-  return `${Math.floor(row / PLACE_SHARD_SIZE)}.json`;
+export function placeDetailsPath(row: number): string {
+  return `${PLACES_PATH}/${row}`;
 }
 
 export function toPlaceDetails(place: PlaceItem): PlaceDetails {
@@ -101,22 +101,4 @@ export function parsePlaceDetails(value: unknown): PlaceDetails | null {
   }
 
   return { row, title, type, lat, lng, kostel, owner, link, eparchy, atd };
-}
-
-export function findPlaceDetails(
-  value: unknown,
-  row: number,
-): PlaceDetails | null {
-  if (!Array.isArray(value)) {
-    return null;
-  }
-
-  for (const item of value) {
-    if (!isRecord(item) || item.row !== row) {
-      continue;
-    }
-    return parsePlaceDetails(item);
-  }
-
-  return null;
 }

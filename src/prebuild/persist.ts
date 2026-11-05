@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { writePlaceDetailsIfStale } from "./placeFiles";
 import { toPlacesGeoJson } from "./placesGeoJson";
 import type { PlaceItem } from "./types";
 
@@ -23,7 +22,6 @@ export function persistPlaces(places: PlaceItem[]): PersistPlacesResult {
   const geojson = toPlacesGeoJson(places);
   writeJson(atdPlacesPath, places);
   writeJson(atdPlacesGeoJsonPath, geojson);
-  writePlaceDetailsIfStale(atdPlacesPath, places);
 
   return {
     jsonPath: atdPlacesPath,

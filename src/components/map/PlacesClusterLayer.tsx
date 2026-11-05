@@ -2,7 +2,6 @@
 
 import { useMapLibreMap } from "@shappoff/ui/map";
 import { useEffect, useState } from "react";
-import { placeDetailsUrl } from "@/lib/paths";
 import { loadPlaceDetails } from "./loadPlaceDetails";
 import { PlaceDrawer, type PlaceDrawerState } from "./PlaceDrawer";
 import {
@@ -35,7 +34,7 @@ export function PlacesClusterLayer({ dataUrl }: PlacesClusterLayerProps) {
       });
       setOpen(true);
 
-      void loadPlaceDetails(placeDetailsUrl(dataUrl, hit.id), hit.id)
+      void loadPlaceDetails(hit.id)
         .then((details) => {
           if (!active || current !== request) {
             return;
