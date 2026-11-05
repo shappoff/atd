@@ -6,6 +6,7 @@
   z-index: 510;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
   gap: var(--sui-space-2);
   padding: calc(var(--sui-space-2) + env(safe-area-inset-top, 0px))
     calc(var(--sui-space-3) + env(safe-area-inset-right, 0px))
@@ -14,6 +15,42 @@
     color-mix(in srgb, var(--sui-color-fg) 10%, transparent);
   background: var(--sui-color-bg);
   pointer-events: auto;
+}
+
+.panel:has(.clearAllIcon) {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+}
+
+.clearAllIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--sui-color-fg) 12%, transparent);
+  border-radius: var(--sui-radius-sm);
+  background: color-mix(in srgb, var(--sui-color-bg) 96%, transparent);
+  color: var(--sui-color-primary);
+  cursor: pointer;
+}
+
+.clearAllIcon:hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--sui-color-primary) 10%,
+    var(--sui-color-bg)
+  );
+}
+
+.clearAllIcon:focus-visible {
+  outline: 2px solid var(--sui-color-primary);
+  outline-offset: 2px;
+}
+
+.clearAllIcon:disabled {
+  cursor: default;
+  opacity: 0.45;
 }
 
 .clearAll {
