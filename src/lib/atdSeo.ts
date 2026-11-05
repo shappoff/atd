@@ -27,6 +27,16 @@ const LIST_HEADING: Record<AtdLevel | "place", string> = {
   place: "Населённые пункты",
 };
 
+const COUNT_FORMS: Record<
+  AtdLevel | "place",
+  readonly [string, string, string]
+> = {
+  gubernia: ["губерния", "губернии", "губерний"],
+  uezd: ["уезд", "уезда", "уездов"],
+  volost: ["волость", "волости", "волостей"],
+  place: ["населённый пункт", "населённых пункта", "населённых пунктов"],
+};
+
 export type AtdSeoLink = {
   label: string;
   href?: string;
@@ -90,10 +100,11 @@ function buildAtdSeoDocument(selection: AtdFilterSelection): AtdSeoDocument {
   const heading = LIST_HEADING[level];
   const items =
     level === "place" ? placeItems(selection) : divisionItems(selection, level);
+  const total = `Всего ${countPhrase(items.length, level)}.`;
   const description =
     title === ROOT_TITLE
-      ? `Карта губерний, уездов, волостей и населённых пунктов. ${heading}: ${items.length}.`
-      : `${heading} — ${title}. Всего ${items.length}.`;
+      ? `Карта губерний, уездов, волостей и населённых пунктов. ${total}`
+      : `${heading} — ${title}. ${total}`;
 
   return {
     title,
@@ -112,6 +123,22 @@ function selectionTitle(selection: AtdFilterSelection): string {
     return ROOT_TITLE;
   }
   return parts.join(", ");
+}
+
+function countPhrase(count: number, level: AtdLevel | "place"): string {
+  const [one, few, many] = COUNT_FORMS[level];
+  const mod100 = Math.abs(count) % 100;
+  const mod10 = mod100 % 10;
+  if (mod100 > 10 && mod100 < 20) {
+    return `${count} ${many}`;
+  }
+  if (mod10 === 1) {
+    return `${count} ${one}`;
+  }
+  if (mod10 > 1 && mod10 < 5) {
+    return `${count} ${few}`;
+  }
+  return `${count} ${many}`;
 }
 
 function listLevel(selection: AtdFilterSelection): AtdLevel | "place" {
