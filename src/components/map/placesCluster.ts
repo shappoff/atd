@@ -13,6 +13,8 @@ export const PLACES_SOURCE_ID = "atd-places";
 export const PLACES_CLUSTER_LAYER_ID = "atd-places-clusters";
 export const PLACES_CLUSTER_COUNT_LAYER_ID = "atd-places-cluster-count";
 export const PLACES_POINT_LAYER_ID = "atd-places-points";
+export const PLACES_ANCHOR_LAYER_ID = "atd-places-anchors";
+export const PLACES_LABEL_LAYER_ID = "atd-places-labels";
 
 export type PlaceHit = {
   id: number;
@@ -25,9 +27,26 @@ const CLUSTER_RADIUS = 1;
 const FRAME_PADDING = 48;
 const FRAME_MAX_ZOOM = 13;
 const FRAME_DURATION = 800;
-const GLYPHS_URL =
-  "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf";
+const PLACE_LABEL_MIN_ZOOM = 10;
+const PLACE_DOT_RADIUS = 5;
+const PLACE_ANCHOR_RADIUS = 3.5;
+const GLYPHS_URL = "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf";
 const FALLBACK_PRIMARY = "#0f766e";
+const FALLBACK_PAPER = "#ffffff";
+const PLACE_LABEL_FILL = "#ffffff";
+const PLACE_LABEL_INK = "#000000";
+const PLACE_LABEL_IMAGE_ID = "atd-places-label-bg";
+const PLACE_LABEL_BORDER = 2;
+const PLACE_LABEL_IMAGE_SIZE = 12;
+const PLACE_LABEL_PIXEL_RATIO = 2;
+const PLACE_LAYER_IDS = [
+  PLACES_LABEL_LAYER_ID,
+  PLACES_ANCHOR_LAYER_ID,
+  PLACES_CLUSTER_COUNT_LAYER_ID,
+  PLACES_CLUSTER_LAYER_ID,
+  PLACES_POINT_LAYER_ID,
+];
+const PLACE_DOT_LAYER_IDS = [PLACES_POINT_LAYER_ID, PLACES_ANCHOR_LAYER_ID];
 
 function themeColor(name: string, fallback: string): string {
   const value = getComputedStyle(document.documentElement)
@@ -140,28 +159,125 @@ export function mountPlacesCluster(
     });
   }
 
-  if (!map.getLayer(PLACES_POINT_LAYER_ID)) {
+  const paper = themeColor("--sui-color-bg", FALLBACK_PAPER);
+  mountPlaceLabelBackground(map);
+
+  addUnclusteredCircles(map, PLACES_POINT_LAYER_ID, primary, paper, {
+    radius: PLACE_DOT_RADIUS,
+    maxzoom: PLACE_LABEL_MIN_ZOOM,
+  });
+  addUnclusteredCircles(map, PLACES_ANCHOR_LAYER_ID, primary, paper, {
+    radius: PLACE_ANCHOR_RADIUS,
+    minzoom: PLACE_LABEL_MIN_ZOOM,
+  });
+
+  if (!map.getLayer(PLACES_LABEL_LAYER_ID)) {
     map.addLayer({
-      id: PLACES_POINT_LAYER_ID,
-      type: "circle",
+      id: PLACES_LABEL_LAYER_ID,
+      type: "symbol",
       source: PLACES_SOURCE_ID,
+      minzoom: PLACE_LABEL_MIN_ZOOM,
       filter: ["!", ["has", "point_count"]],
+      layout: {
+        "icon-image": PLACE_LABEL_IMAGE_ID,
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [3, 5, 3, 5],
+        "text-field": ["get", "title"],
+        "text-font": ["Open Sans Regular"],
+        "text-size": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          PLACE_LABEL_MIN_ZOOM,
+          13,
+          PLACE_LABEL_MIN_ZOOM + 4,
+          16,
+        ],
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right",
+          "top-left",
+          "top-right",
+          "bottom-left",
+          "bottom-right",
+        ],
+        "text-radial-offset": 1,
+        "text-justify": "auto",
+        "text-padding": 4,
+        "text-max-width": 10,
+      },
       paint: {
-        "circle-color": primary,
-        "circle-radius": 5,
-        "circle-stroke-width": 1,
-        "circle-stroke-color": "#ffffff",
+        "text-color": PLACE_LABEL_INK,
       },
     });
   }
 }
 
+function mountPlaceLabelBackground(map: MapLibreGlMap): void {
+  if (map.hasImage(PLACE_LABEL_IMAGE_ID)) {
+    return;
+  }
+  const image = placeLabelBackground();
+  if (!image) {
+    return;
+  }
+  const border = PLACE_LABEL_BORDER;
+  const size = PLACE_LABEL_IMAGE_SIZE;
+  map.addImage(PLACE_LABEL_IMAGE_ID, image, {
+    pixelRatio: PLACE_LABEL_PIXEL_RATIO,
+    stretchX: [[border, size - border]],
+    stretchY: [[border, size - border]],
+    content: [border, border, size - border, size - border],
+  });
+}
+
+function placeLabelBackground(): ImageData | null {
+  const size = PLACE_LABEL_IMAGE_SIZE;
+  const border = PLACE_LABEL_BORDER;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return null;
+  }
+  context.fillStyle = PLACE_LABEL_INK;
+  context.fillRect(0, 0, size, size);
+  context.fillStyle = PLACE_LABEL_FILL;
+  context.fillRect(border, border, size - border * 2, size - border * 2);
+  return context.getImageData(0, 0, size, size);
+}
+
+function addUnclusteredCircles(
+  map: MapLibreGlMap,
+  id: string,
+  fill: string,
+  stroke: string,
+  options: { radius: number; minzoom?: number; maxzoom?: number },
+): void {
+  if (map.getLayer(id)) {
+    return;
+  }
+  map.addLayer({
+    id,
+    type: "circle",
+    source: PLACES_SOURCE_ID,
+    filter: ["!", ["has", "point_count"]],
+    ...(options.minzoom === undefined ? {} : { minzoom: options.minzoom }),
+    ...(options.maxzoom === undefined ? {} : { maxzoom: options.maxzoom }),
+    paint: {
+      "circle-color": fill,
+      "circle-radius": options.radius,
+      "circle-stroke-width": 1,
+      "circle-stroke-color": stroke,
+    },
+  });
+}
+
 export function unmountPlacesCluster(map: MapLibreGlMap): void {
-  for (const layerId of [
-    PLACES_CLUSTER_COUNT_LAYER_ID,
-    PLACES_CLUSTER_LAYER_ID,
-    PLACES_POINT_LAYER_ID,
-  ]) {
+  for (const layerId of PLACE_LAYER_IDS) {
     if (map.getLayer(layerId)) {
       map.removeLayer(layerId);
     }
@@ -169,6 +285,10 @@ export function unmountPlacesCluster(map: MapLibreGlMap): void {
 
   if (map.getSource(PLACES_SOURCE_ID)) {
     map.removeSource(PLACES_SOURCE_ID);
+  }
+
+  if (map.hasImage(PLACE_LABEL_IMAGE_ID)) {
+    map.removeImage(PLACE_LABEL_IMAGE_ID);
   }
 }
 
@@ -322,22 +442,32 @@ export function attachPlacesClusterInteractions(
   };
 
   map.on("click", PLACES_CLUSTER_LAYER_ID, onClusterClick);
-  map.on("click", PLACES_POINT_LAYER_ID, onPointClick);
   map.on("mouseenter", PLACES_CLUSTER_LAYER_ID, setPointer);
   map.on("mouseleave", PLACES_CLUSTER_LAYER_ID, clearPointer);
-  map.on("mouseenter", PLACES_POINT_LAYER_ID, onPointHover);
-  map.on("mousemove", PLACES_POINT_LAYER_ID, onPointHover);
-  map.on("mouseleave", PLACES_POINT_LAYER_ID, onPointLeave);
+  for (const layerId of PLACE_DOT_LAYER_IDS) {
+    map.on("click", layerId, onPointClick);
+    map.on("mouseenter", layerId, onPointHover);
+    map.on("mousemove", layerId, onPointHover);
+    map.on("mouseleave", layerId, onPointLeave);
+  }
+  map.on("click", PLACES_LABEL_LAYER_ID, onPointClick);
+  map.on("mouseenter", PLACES_LABEL_LAYER_ID, setPointer);
+  map.on("mouseleave", PLACES_LABEL_LAYER_ID, clearPointer);
 
   return () => {
     popup.remove();
     map.off("click", PLACES_CLUSTER_LAYER_ID, onClusterClick);
-    map.off("click", PLACES_POINT_LAYER_ID, onPointClick);
     map.off("mouseenter", PLACES_CLUSTER_LAYER_ID, setPointer);
     map.off("mouseleave", PLACES_CLUSTER_LAYER_ID, clearPointer);
-    map.off("mouseenter", PLACES_POINT_LAYER_ID, onPointHover);
-    map.off("mousemove", PLACES_POINT_LAYER_ID, onPointHover);
-    map.off("mouseleave", PLACES_POINT_LAYER_ID, onPointLeave);
+    for (const layerId of PLACE_DOT_LAYER_IDS) {
+      map.off("click", layerId, onPointClick);
+      map.off("mouseenter", layerId, onPointHover);
+      map.off("mousemove", layerId, onPointHover);
+      map.off("mouseleave", layerId, onPointLeave);
+    }
+    map.off("click", PLACES_LABEL_LAYER_ID, onPointClick);
+    map.off("mouseenter", PLACES_LABEL_LAYER_ID, setPointer);
+    map.off("mouseleave", PLACES_LABEL_LAYER_ID, clearPointer);
     clearPointer();
   };
 }
