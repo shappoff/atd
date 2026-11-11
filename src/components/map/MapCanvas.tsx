@@ -10,6 +10,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { BasemapSelect } from "./BasemapSelect";
 import { PlacesClusterLayer } from "./PlacesClusterLayer";
 import { PlacesFilterPanel } from "./PlacesFilterPanel";
+import { UnlocatedPlaces } from "./UnlocatedPlaces";
 import { useAtdFilterIndex } from "./useAtdFilterIndex";
 import { useAtdFilterRoute } from "./useAtdFilterRoute";
 
@@ -19,6 +20,7 @@ type MapCanvasProps = {
   workerUrl: string;
   placesUrl: string;
   filtersUrl: string;
+  unlocatedUrl: string;
   children?: ReactNode;
 };
 
@@ -37,6 +39,7 @@ export function MapCanvas({
   workerUrl,
   placesUrl,
   filtersUrl,
+  unlocatedUrl,
   children,
 }: MapCanvasProps) {
   const index = useAtdFilterIndex(filtersUrl);
@@ -53,6 +56,7 @@ export function MapCanvas({
       <FreeMapBounds />
       <BasemapSelect value={basemap} onChange={setBasemap} />
       <PlacesFilterPanel index={index} value={selection} onChange={onChange} />
+      <UnlocatedPlaces url={unlocatedUrl} selection={selection} />
       <PlacesClusterLayer
         dataUrl={placesUrl}
         filter={selection}

@@ -1,4 +1,5 @@
 import { collectAtdPaths, pathKey } from "./atdHierarchy";
+import { hasPlaceCoordinates } from "./placeCoordinates";
 import type { PlaceItem } from "./types";
 
 export type PlaceFeatureProperties = {
@@ -22,22 +23,11 @@ export type PlacesGeoJson = {
   features: PlaceFeature[];
 };
 
-function hasCoordinates(
-  place: PlaceItem,
-): place is PlaceItem & { lat: number; lng: number } {
-  return (
-    place.lat != null &&
-    place.lng != null &&
-    Number.isFinite(place.lat) &&
-    Number.isFinite(place.lng)
-  );
-}
-
 export function toPlacesGeoJson(places: PlaceItem[]): PlacesGeoJson {
   const features: PlaceFeature[] = [];
 
   for (const place of places) {
-    if (!hasCoordinates(place)) {
+    if (!hasPlaceCoordinates(place)) {
       continue;
     }
 

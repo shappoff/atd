@@ -26,6 +26,7 @@ type MapViewProps = {
   workerUrl: string;
   placesUrl: string;
   filtersUrl: string;
+  unlocatedUrl: string;
   children?: ReactNode;
 };
 
@@ -33,6 +34,7 @@ export function MapView({
   workerUrl,
   placesUrl,
   filtersUrl,
+  unlocatedUrl,
   children,
 }: MapViewProps) {
   return (
@@ -40,6 +42,7 @@ export function MapView({
       workerUrl={workerUrl}
       placesUrl={placesUrl}
       filtersUrl={filtersUrl}
+      unlocatedUrl={unlocatedUrl}
     >
       {children}
     </MapCanvas>

@@ -5,6 +5,7 @@ import { GAAnalytics } from "@/components/shared/GAAnalytics";
 import {
   ATD_FILTERS_PUBLIC_PATH,
   ATD_PLACES_PUBLIC_PATH,
+  ATD_UNLOCATED_PUBLIC_PATH,
   absoluteUrl,
   withBasePath,
 } from "@/lib/paths";
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               workerUrl={withBasePath("/maplibre/maplibre-gl-worker.mjs")}
               placesUrl={withBasePath(ATD_PLACES_PUBLIC_PATH)}
               filtersUrl={withBasePath(ATD_FILTERS_PUBLIC_PATH)}
+              unlocatedUrl={withBasePath(ATD_UNLOCATED_PUBLIC_PATH)}
             />
           </div>
           <div className={styles.content}>{children}</div>

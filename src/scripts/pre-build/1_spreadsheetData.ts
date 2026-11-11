@@ -46,6 +46,9 @@ export default async function extractSpreadsheetData() {
     console.log(
       `Saved ${result.filterPathCount} filter paths to ${result.filtersPath}`,
     );
+    console.log(
+      `Saved ${result.unlocatedCount} unlocated places to ${result.unlocatedPath}`,
+    );
     return;
   }
 
@@ -67,5 +70,8 @@ export default async function extractSpreadsheetData() {
   );
   console.log(
     `Saved ${result.filterPathCount} filter paths to ${result.filtersPath}`,
+  );
+  console.log(
+    `Saved ${result.unlocatedCount} unlocated places to ${result.unlocatedPath}`,
   );
 }

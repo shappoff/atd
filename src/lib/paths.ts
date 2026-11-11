@@ -1,5 +1,6 @@
 export const ATD_FILTERS_PUBLIC_PATH = "/atdFilters.json";
 export const ATD_PLACES_PUBLIC_PATH = "/atdPlaces.geojson";
+export const ATD_UNLOCATED_PUBLIC_PATH = "/atdUnlocated.json";
 
 const basePath = process.env.PAGES_BASE_PATH ?? "";
 const publicSite = new URL(
