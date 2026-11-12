@@ -36,9 +36,13 @@ const FALLBACK_PAPER = "#ffffff";
 const PLACE_LABEL_FILL = "#ffffff";
 const PLACE_LABEL_INK = "#000000";
 const PLACE_LABEL_IMAGE_ID = "atd-places-label-bg";
+const PLACE_LOCALITY_IMAGE_ID = "atd-places-locality";
 const PLACE_LABEL_BORDER = 2;
-const PLACE_LABEL_IMAGE_SIZE = 12;
+const PLACE_LABEL_RADIUS = 8;
+const PLACE_LABEL_IMAGE_SIZE = PLACE_LABEL_RADIUS * 2 + 4;
 const PLACE_LABEL_PIXEL_RATIO = 2;
+const PLACE_LOCALITY_SIZE = 16;
+const PLACE_SPRITE_IDS = [PLACE_LABEL_IMAGE_ID, PLACE_LOCALITY_IMAGE_ID];
 const PLACE_LAYER_IDS = [
   PLACES_LABEL_LAYER_ID,
   PLACES_ANCHOR_LAYER_ID,
@@ -46,7 +50,11 @@ const PLACE_LAYER_IDS = [
   PLACES_CLUSTER_LAYER_ID,
   PLACES_POINT_LAYER_ID,
 ];
-const PLACE_DOT_LAYER_IDS = [PLACES_POINT_LAYER_ID, PLACES_ANCHOR_LAYER_ID];
+const PLACE_HIT_LAYER_IDS = [
+  PLACES_LABEL_LAYER_ID,
+  PLACES_ANCHOR_LAYER_ID,
+  PLACES_POINT_LAYER_ID,
+];
 
 function themeColor(name: string, fallback: string): string {
   const value = getComputedStyle(document.documentElement)
@@ -160,7 +168,7 @@ export function mountPlacesCluster(
   }
 
   const paper = themeColor("--sui-color-bg", FALLBACK_PAPER);
-  mountPlaceLabelBackground(map);
+  mountPlaceLabelImages(map, primary);
 
   addUnclusteredCircles(map, PLACES_POINT_LAYER_ID, primary, paper, {
     radius: PLACE_DOT_RADIUS,
@@ -181,32 +189,38 @@ export function mountPlacesCluster(
       layout: {
         "icon-image": PLACE_LABEL_IMAGE_ID,
         "icon-text-fit": "both",
-        "icon-text-fit-padding": [3, 5, 3, 5],
-        "text-field": ["get", "title"],
+        "icon-text-fit-padding": [2, 5, 2, 5],
+        "text-field": [
+          "format",
+          ["image", PLACE_LOCALITY_IMAGE_ID],
+          { "vertical-align": "center" },
+          "\u2002",
+          ["get", "title"],
+        ],
         "text-font": ["Open Sans Regular"],
         "text-size": [
           "interpolate",
           ["linear"],
           ["zoom"],
           PLACE_LABEL_MIN_ZOOM,
-          13,
+          14,
           PLACE_LABEL_MIN_ZOOM + 4,
           16,
         ],
         "text-variable-anchor": [
-          "top",
-          "bottom",
           "left",
           "right",
+          "top",
+          "bottom",
           "top-left",
           "top-right",
           "bottom-left",
           "bottom-right",
         ],
-        "text-radial-offset": 1,
+        "text-radial-offset": 1.2,
         "text-justify": "auto",
-        "text-padding": 4,
-        "text-max-width": 10,
+        "text-padding": 2,
+        "text-max-width": 12,
       },
       paint: {
         "text-color": PLACE_LABEL_INK,
@@ -215,27 +229,41 @@ export function mountPlacesCluster(
   }
 }
 
-function mountPlaceLabelBackground(map: MapLibreGlMap): void {
-  if (map.hasImage(PLACE_LABEL_IMAGE_ID)) {
-    return;
-  }
-  const image = placeLabelBackground();
-  if (!image) {
-    return;
-  }
-  const border = PLACE_LABEL_BORDER;
+function mountPlaceLabelImages(map: MapLibreGlMap, accent: string): void {
+  const cap = PLACE_LABEL_RADIUS;
   const size = PLACE_LABEL_IMAGE_SIZE;
-  map.addImage(PLACE_LABEL_IMAGE_ID, image, {
+  addPlaceImage(map, PLACE_LABEL_IMAGE_ID, placeLabelBackground(accent), {
     pixelRatio: PLACE_LABEL_PIXEL_RATIO,
-    stretchX: [[border, size - border]],
-    stretchY: [[border, size - border]],
-    content: [border, border, size - border, size - border],
+    stretchX: [[cap, size - cap]],
+    stretchY: [[cap, size - cap]],
+    content: [cap, cap, size - cap, size - cap],
+  });
+  addPlaceImage(map, PLACE_LOCALITY_IMAGE_ID, localityMark(accent), {
+    pixelRatio: PLACE_LABEL_PIXEL_RATIO,
   });
 }
 
-function placeLabelBackground(): ImageData | null {
-  const size = PLACE_LABEL_IMAGE_SIZE;
-  const border = PLACE_LABEL_BORDER;
+function addPlaceImage(
+  map: MapLibreGlMap,
+  id: string,
+  image: ImageData | null,
+  options: {
+    pixelRatio: number;
+    stretchX?: Array<[number, number]>;
+    stretchY?: Array<[number, number]>;
+    content?: [number, number, number, number];
+  },
+): void {
+  if (!image || map.hasImage(id)) {
+    return;
+  }
+  map.addImage(id, image, options);
+}
+
+function placeRaster(
+  size: number,
+  draw: (context: CanvasRenderingContext2D) => void,
+): ImageData | null {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
@@ -243,11 +271,51 @@ function placeLabelBackground(): ImageData | null {
   if (!context) {
     return null;
   }
-  context.fillStyle = PLACE_LABEL_INK;
-  context.fillRect(0, 0, size, size);
-  context.fillStyle = PLACE_LABEL_FILL;
-  context.fillRect(border, border, size - border * 2, size - border * 2);
+  draw(context);
   return context.getImageData(0, 0, size, size);
+}
+
+function fillRoundRect(
+  context: CanvasRenderingContext2D,
+  color: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+): void {
+  context.fillStyle = color;
+  context.beginPath();
+  context.roundRect(x, y, width, height, radius);
+  context.fill();
+}
+
+function placeLabelBackground(accent: string): ImageData | null {
+  const size = PLACE_LABEL_IMAGE_SIZE;
+  const border = PLACE_LABEL_BORDER;
+  const radius = PLACE_LABEL_RADIUS;
+  return placeRaster(size, (context) => {
+    fillRoundRect(context, accent, 0, 0, size, size, radius);
+    fillRoundRect(
+      context,
+      PLACE_LABEL_FILL,
+      border,
+      border,
+      size - border * 2,
+      size - border * 2,
+      radius - border,
+    );
+  });
+}
+
+function localityMark(accent: string): ImageData | null {
+  const size = PLACE_LOCALITY_SIZE;
+  return placeRaster(size, (context) => {
+    context.fillStyle = accent;
+    context.beginPath();
+    context.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+    context.fill();
+  });
 }
 
 function addUnclusteredCircles(
@@ -287,8 +355,10 @@ export function unmountPlacesCluster(map: MapLibreGlMap): void {
     map.removeSource(PLACES_SOURCE_ID);
   }
 
-  if (map.hasImage(PLACE_LABEL_IMAGE_ID)) {
-    map.removeImage(PLACE_LABEL_IMAGE_ID);
+  for (const imageId of PLACE_SPRITE_IDS) {
+    if (map.hasImage(imageId)) {
+      map.removeImage(imageId);
+    }
   }
 }
 
@@ -444,30 +514,24 @@ export function attachPlacesClusterInteractions(
   map.on("click", PLACES_CLUSTER_LAYER_ID, onClusterClick);
   map.on("mouseenter", PLACES_CLUSTER_LAYER_ID, setPointer);
   map.on("mouseleave", PLACES_CLUSTER_LAYER_ID, clearPointer);
-  for (const layerId of PLACE_DOT_LAYER_IDS) {
+  for (const layerId of PLACE_HIT_LAYER_IDS) {
     map.on("click", layerId, onPointClick);
     map.on("mouseenter", layerId, onPointHover);
     map.on("mousemove", layerId, onPointHover);
     map.on("mouseleave", layerId, onPointLeave);
   }
-  map.on("click", PLACES_LABEL_LAYER_ID, onPointClick);
-  map.on("mouseenter", PLACES_LABEL_LAYER_ID, setPointer);
-  map.on("mouseleave", PLACES_LABEL_LAYER_ID, clearPointer);
 
   return () => {
     popup.remove();
     map.off("click", PLACES_CLUSTER_LAYER_ID, onClusterClick);
     map.off("mouseenter", PLACES_CLUSTER_LAYER_ID, setPointer);
     map.off("mouseleave", PLACES_CLUSTER_LAYER_ID, clearPointer);
-    for (const layerId of PLACE_DOT_LAYER_IDS) {
+    for (const layerId of PLACE_HIT_LAYER_IDS) {
       map.off("click", layerId, onPointClick);
       map.off("mouseenter", layerId, onPointHover);
       map.off("mousemove", layerId, onPointHover);
       map.off("mouseleave", layerId, onPointLeave);
     }
-    map.off("click", PLACES_LABEL_LAYER_ID, onPointClick);
-    map.off("mouseenter", PLACES_LABEL_LAYER_ID, setPointer);
-    map.off("mouseleave", PLACES_LABEL_LAYER_ID, clearPointer);
     clearPointer();
   };
 }
