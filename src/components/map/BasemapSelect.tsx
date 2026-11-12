@@ -38,7 +38,43 @@ function CheckIcon() {
   );
 }
 
+function LayersIcon() {
+  return (
+    <svg
+      className={styles.icon}
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M8 1.5 2.25 3.9 8 6.3l5.75-2.4L8 1.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2.25 7.2 8 9.6l5.75-2.4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2.25 10.35 8 12.75l5.75-2.4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function BasemapSelect({ value, onChange }: BasemapSelectProps) {
+  const layerLabel = TILE_LAYERS[value].label;
+
   return (
     <div className={styles.root}>
       <Select.Root
@@ -53,8 +89,9 @@ export function BasemapSelect({ value, onChange }: BasemapSelectProps) {
       >
         <Select.Trigger
           className="sui-map__switcher-trigger"
-          aria-label="Слой карты"
+          aria-label={`Слой карты: ${layerLabel}`}
         >
+          <LayersIcon />
           <Select.Value className="sui-map__switcher-value" />
         </Select.Trigger>
         <Select.Portal>

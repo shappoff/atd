@@ -19,6 +19,24 @@
   }
 }
 
+.root :global(.sui-map__switcher-trigger) {
+  gap: 0.375rem;
+}
+
+.root :global(.sui-map__switcher-trigger):hover {
+  background-color: var(--sui-color-bg);
+}
+
+.root :global(.sui-map__switcher-trigger)[data-popup-open] {
+  border-color: color-mix(in srgb, var(--sui-color-primary) 45%, transparent);
+}
+
+.icon {
+  display: block;
+  flex-shrink: 0;
+  color: var(--sui-color-primary);
+}
+
 .positioner {
   z-index: 1200;
   min-width: max(var(--anchor-width), 12rem);
