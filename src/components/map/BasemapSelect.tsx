@@ -2,16 +2,32 @@
 
 import { Select } from "@base-ui/react/select";
 import {
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@shappoff/ui";
+import {
   TILE_LAYER_ORDER,
   TILE_LAYERS,
   type TileLayerId,
 } from "@shappoff/ui/map";
+import { useState } from "react";
 import styles from "./BasemapSelect.module.css";
+import { useNarrowViewport } from "./useNarrowViewport";
+
+const BASEMAP_NAME = "Слой карты";
 
 const BASEMAP_ITEMS = TILE_LAYER_ORDER.map((id) => ({
   value: id,
   label: TILE_LAYERS[id].label,
 }));
+
+function basemapAriaLabel(label: string): string {
+  return `${BASEMAP_NAME}: ${label}`;
+}
 
 type BasemapSelectProps = {
   value: TileLayerId;
@@ -72,60 +88,120 @@ function LayersIcon() {
   );
 }
 
-export function BasemapSelect({ value, onChange }: BasemapSelectProps) {
+function BasemapTriggerContent({ label }: { label: string }) {
+  return (
+    <>
+      <LayersIcon />
+      <span className="sui-map__switcher-value">{label}</span>
+    </>
+  );
+}
+
+function BasemapMenu({ value, onChange }: BasemapSelectProps) {
   const layerLabel = TILE_LAYERS[value].label;
 
   return (
-    <div className={styles.root}>
-      <Select.Root
-        items={BASEMAP_ITEMS}
-        value={value}
-        modal={false}
-        onValueChange={(next) => {
-          if (next != null) {
-            onChange(next);
-          }
-        }}
+    <Select.Root
+      items={BASEMAP_ITEMS}
+      value={value}
+      modal={false}
+      onValueChange={(next) => {
+        if (next != null) {
+          onChange(next);
+        }
+      }}
+    >
+      <Select.Trigger
+        className="sui-map__switcher-trigger"
+        aria-label={basemapAriaLabel(layerLabel)}
       >
-        <Select.Trigger
-          className="sui-map__switcher-trigger"
-          aria-label={`Слой карты: ${layerLabel}`}
+        <BasemapTriggerContent label={layerLabel} />
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Positioner
+          className={styles.positioner}
+          side="bottom"
+          sideOffset={4}
+          align="end"
+          collisionPadding={8}
         >
-          <LayersIcon />
-          <Select.Value className="sui-map__switcher-value" />
-        </Select.Trigger>
-        <Select.Portal>
-          <Select.Positioner
-            className={styles.positioner}
-            side="bottom"
-            sideOffset={4}
-            align="end"
-            collisionPadding={8}
-          >
-            <Select.Popup className={styles.popup}>
-              <Select.List className={styles.list}>
-                {BASEMAP_ITEMS.map((item) => (
-                  <Select.Item
-                    key={item.value}
-                    value={item.value}
-                    className={styles.item}
+          <Select.Popup className={styles.popup}>
+            <Select.List className={styles.list}>
+              {BASEMAP_ITEMS.map((item) => (
+                <Select.Item
+                  key={item.value}
+                  value={item.value}
+                  className={styles.item}
+                >
+                  <Select.ItemIndicator
+                    className={styles.indicator}
+                    keepMounted
                   >
-                    <Select.ItemIndicator
-                      className={styles.indicator}
-                      keepMounted
-                    >
-                      <CheckIcon />
-                    </Select.ItemIndicator>
-                    <Select.ItemText className={styles.itemText}>
-                      {item.label}
-                    </Select.ItemText>
-                  </Select.Item>
-                ))}
-              </Select.List>
-            </Select.Popup>
-          </Select.Positioner>
-        </Select.Portal>
-      </Select.Root>
+                    <CheckIcon />
+                  </Select.ItemIndicator>
+                  <Select.ItemText className={styles.itemText}>
+                    {item.label}
+                  </Select.ItemText>
+                </Select.Item>
+              ))}
+            </Select.List>
+          </Select.Popup>
+        </Select.Positioner>
+      </Select.Portal>
+    </Select.Root>
+  );
+}
+
+function BasemapDrawer({ value, onChange }: BasemapSelectProps) {
+  const [open, setOpen] = useState(false);
+  const layerLabel = TILE_LAYERS[value].label;
+
+  return (
+    <Drawer open={open} onOpenChange={setOpen} showSwipeHandle>
+      <DrawerTrigger
+        className="sui-map__switcher-trigger"
+        aria-label={basemapAriaLabel(layerLabel)}
+      >
+        <BasemapTriggerContent label={layerLabel} />
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>{BASEMAP_NAME}</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody className="sui-map__switcher-options">
+          {BASEMAP_ITEMS.map((item) => {
+            const selected = item.value === value;
+            return (
+              <button
+                key={item.value}
+                type="button"
+                className={
+                  selected
+                    ? "sui-map__switcher-option sui-map__switcher-option--selected"
+                    : "sui-map__switcher-option"
+                }
+                aria-pressed={selected}
+                onClick={() => {
+                  onChange(item.value);
+                  setOpen(false);
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+export function BasemapSelect(props: BasemapSelectProps) {
+  const narrow = useNarrowViewport();
+
+  return (
+    <div className={styles.root} data-narrow={narrow ? "" : undefined}>
+      {narrow ? <BasemapDrawer {...props} /> : <BasemapMenu {...props} />}
     </div>
   );
 }

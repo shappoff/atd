@@ -81,6 +81,10 @@
   cursor: default;
 }
 
+:global(.sui-map) {
+  --atd-filter-toggle-size: 2.5rem;
+}
+
 .toggle {
   position: absolute;
   top: calc(0.75rem + env(safe-area-inset-top, 0px));
@@ -89,8 +93,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--atd-filter-toggle-size);
+  height: var(--atd-filter-toggle-size);
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--sui-color-fg) 12%, transparent);
   border-radius: var(--sui-radius-sm);
@@ -153,10 +157,4 @@
 :global(.sui-map.sui-map--maplibre) :global(.sui-map__canvas) {
   top: var(--atd-filter-panel-offset, 0px);
   height: auto;
-}
-
-:global(.sui-map__switcher) {
-  top: calc(var(--atd-filter-panel-offset, 0px) + 0.75rem);
-  right: auto;
-  left: calc(0.75rem + env(safe-area-inset-left, 0px));
 }
