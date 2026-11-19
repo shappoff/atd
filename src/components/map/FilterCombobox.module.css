@@ -178,32 +178,6 @@
   visibility: hidden;
 }
 
-.drawerHeading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sui-space-3);
-  width: 100%;
-}
-
-.drawerTitle {
-  min-width: 0;
-  text-align: left;
-}
-
-.drawerClose {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--sui-color-muted);
-  font: inherit;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
 .search {
   width: 100%;
   padding: 0.55rem 0.75rem;

@@ -13,19 +13,6 @@
   gap: var(--sui-space-2);
 }
 
-.close {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--sui-color-muted);
-  font: inherit;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
 .fields {
   display: flex;
   flex-direction: column;

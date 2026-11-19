@@ -4,6 +4,7 @@ import { Select } from "@base-ui/react/select";
 import {
   Drawer,
   DrawerBody,
+  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
@@ -16,6 +17,7 @@ import {
 } from "@shappoff/ui/map";
 import { useState } from "react";
 import styles from "./BasemapSelect.module.css";
+import sheet from "./drawerSheet.module.css";
 import { useNarrowViewport } from "./useNarrowViewport";
 
 const BASEMAP_NAME = "Слой карты";
@@ -166,30 +168,40 @@ function BasemapDrawer({ value, onChange }: BasemapSelectProps) {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>{BASEMAP_NAME}</DrawerTitle>
+          <div className={sheet.heading}>
+            <DrawerTitle className={sheet.title}>{BASEMAP_NAME}</DrawerTitle>
+            <DrawerClose className={sheet.close} aria-label="Закрыть">
+              ×
+            </DrawerClose>
+          </div>
         </DrawerHeader>
-        <DrawerBody className="sui-map__switcher-options">
-          {BASEMAP_ITEMS.map((item) => {
-            const selected = item.value === value;
-            return (
-              <button
-                key={item.value}
-                type="button"
-                className={
-                  selected
-                    ? "sui-map__switcher-option sui-map__switcher-option--selected"
-                    : "sui-map__switcher-option"
-                }
-                aria-pressed={selected}
-                onClick={() => {
-                  onChange(item.value);
-                  setOpen(false);
-                }}
-              >
-                {item.label}
-              </button>
-            );
-          })}
+        <DrawerBody className={sheet.body}>
+          <div className={styles.list}>
+            {BASEMAP_ITEMS.map((item) => {
+              const selected = item.value === value;
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  className={styles.item}
+                  data-selected={selected ? "" : undefined}
+                  aria-pressed={selected}
+                  onClick={() => {
+                    onChange(item.value);
+                    setOpen(false);
+                  }}
+                >
+                  <span
+                    className={styles.indicator}
+                    data-selected={selected ? "" : undefined}
+                  >
+                    <CheckIcon />
+                  </span>
+                  <span className={styles.itemText}>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </DrawerBody>
       </DrawerContent>
     </Drawer>

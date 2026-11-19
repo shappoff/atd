@@ -10,6 +10,7 @@ import {
   DrawerTitle,
 } from "@shappoff/ui";
 import { useEffect, useId, useRef, useState } from "react";
+import sheet from "./drawerSheet.module.css";
 import styles from "./FilterCombobox.module.css";
 import { useNarrowViewport } from "./useNarrowViewport";
 
@@ -227,9 +228,9 @@ function FilterOptionDrawer({
       >
         <DrawerContent>
           <DrawerHeader>
-            <div className={styles.drawerHeading}>
-              <DrawerTitle className={styles.drawerTitle}>{label}</DrawerTitle>
-              <DrawerClose className={styles.drawerClose} aria-label="Закрыть">
+            <div className={sheet.heading}>
+              <DrawerTitle className={sheet.title}>{label}</DrawerTitle>
+              <DrawerClose className={sheet.close} aria-label="Закрыть">
                 ×
               </DrawerClose>
             </div>
@@ -244,7 +245,7 @@ function FilterOptionDrawer({
               onChange={(event) => setQuery(event.target.value)}
             />
           </DrawerHeader>
-          <DrawerBody>
+          <DrawerBody className={sheet.body}>
             {visibleItems.length === 0 ? (
               <p className={styles.empty}>Ничего не найдено</p>
             ) : (

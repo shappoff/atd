@@ -17,6 +17,7 @@ import {
   EMPTY_ATD_FILTER_SELECTION,
   hasAtdFilterSelection,
 } from "@/prebuild/atdHierarchy";
+import sheet from "./drawerSheet.module.css";
 import { FilterCombobox } from "./FilterCombobox";
 import styles from "./PlacesFilterPanel.module.css";
 import { useNarrowViewport } from "./useNarrowViewport";
@@ -237,14 +238,14 @@ function PlacesFilterDrawer({
       >
         <DrawerContent>
           <DrawerHeader>
-            <div className={styles.drawerHeading}>
-              <DrawerTitle className={styles.drawerTitle}>Фильтры</DrawerTitle>
-              <DrawerClose className={styles.drawerClose} aria-label="Закрыть">
+            <div className={sheet.heading}>
+              <DrawerTitle className={sheet.title}>Фильтры</DrawerTitle>
+              <DrawerClose className={sheet.close} aria-label="Закрыть">
                 ×
               </DrawerClose>
             </div>
           </DrawerHeader>
-          <DrawerBody>
+          <DrawerBody className={sheet.body}>
             <form
               className={styles.drawerFields}
               aria-label="Фильтры административного деления"

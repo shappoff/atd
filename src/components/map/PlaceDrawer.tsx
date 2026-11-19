@@ -10,6 +10,7 @@ import {
   DrawerTitle,
 } from "@shappoff/ui";
 import type { PlaceDetails } from "@/prebuild/placeDetails";
+import sheet from "./drawerSheet.module.css";
 import styles from "./PlaceDrawer.module.css";
 import { PlaceFacts } from "./PlaceFacts";
 import { useDrawerSwipeDirection } from "./useDrawerSwipeDirection";
@@ -54,12 +55,13 @@ export function PlaceDrawer({
               {type ? <DrawerDescription>{type}</DrawerDescription> : null}
               <DrawerTitle>{title}</DrawerTitle>
             </div>
-            <DrawerClose className={styles.close} aria-label="Закрыть">
+            <DrawerClose className={sheet.close} aria-label="Закрыть">
               ×
             </DrawerClose>
           </div>
         </DrawerHeader>
         <DrawerBody
+          className={sheet.body}
           aria-busy={place != null && place.details == null && !place.error}
         >
           {place?.error ? (

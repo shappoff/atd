@@ -1,0 +1,43 @@
+.heading {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  justify-content: space-between;
+  gap: var(--sui-space-3);
+  width: 100%;
+}
+
+.title {
+  min-width: 0;
+  text-align: left;
+}
+
+.close {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sui-color-muted);
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.body {
+  padding-bottom: calc(var(--sui-space-4) + env(safe-area-inset-bottom, 0px));
+}
+
+:global(.sui-drawer-popup[data-swipe-direction="down"]) .body {
+  padding-bottom: calc(
+    var(--sui-space-4) +
+    2.75rem +
+    env(safe-area-inset-bottom, 0px)
+  );
+}
+
+:global(body:has(.sui-drawer-popup[data-swipe-direction="down"]))
+  :global(.maplibregl-ctrl-bottom-left) {
+  visibility: hidden;
+}

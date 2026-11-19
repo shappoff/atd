@@ -11,6 +11,7 @@ import {
 } from "@shappoff/ui";
 import { useEffect, useId, useMemo, useState } from "react";
 import type { AtdFilterSelection } from "@/prebuild/atdHierarchy";
+import sheet from "./drawerSheet.module.css";
 import {
   filterUnlocatedPlaces,
   type UnlocatedPlace,
@@ -206,7 +207,7 @@ export function UnlocatedPlaces({ url, selection }: UnlocatedPlacesProps) {
                 <DrawerTitle>{scope}</DrawerTitle>
                 <DrawerDescription>{drawerDescription}</DrawerDescription>
               </div>
-              <DrawerClose className={styles.close} aria-label="Закрыть">
+              <DrawerClose className={sheet.close} aria-label="Закрыть">
                 ×
               </DrawerClose>
             </div>
@@ -219,7 +220,7 @@ export function UnlocatedPlaces({ url, selection }: UnlocatedPlacesProps) {
               onChange={(event) => setQuery(event.target.value)}
             />
           </DrawerHeader>
-          <DrawerBody>
+          <DrawerBody className={sheet.body}>
             {open && shown.length === 0 ? (
               <p className={styles.empty}>Ничего не найдено</p>
             ) : null}

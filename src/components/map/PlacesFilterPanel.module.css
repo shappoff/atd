@@ -122,32 +122,6 @@
   box-shadow: 0 0 0 1.5px var(--sui-color-bg);
 }
 
-.drawerHeading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sui-space-3);
-  width: 100%;
-}
-
-.drawerTitle {
-  min-width: 0;
-  text-align: left;
-}
-
-.drawerClose {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--sui-color-muted);
-  font: inherit;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
 .drawerFields {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

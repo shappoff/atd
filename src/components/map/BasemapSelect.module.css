@@ -88,7 +88,9 @@
   outline: none;
 }
 
-.item[data-highlighted] {
+.item[data-highlighted],
+.item:hover,
+.item:focus-visible {
   background: color-mix(
     in srgb,
     var(--sui-color-primary) 12%,
