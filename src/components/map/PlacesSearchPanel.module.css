@@ -1,0 +1,120 @@
+.searchRegion {
+  display: block;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.search {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--sui-space-2);
+  min-width: 0;
+  pointer-events: auto;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--sui-color-fg) 12%, transparent);
+  border-radius: var(--sui-radius-sm);
+  background: var(--sui-color-bg);
+  color: var(--sui-color-fg);
+  font: inherit;
+  font-size: max(16px, 0.875rem);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--sui-color-primary);
+  outline-offset: 1px;
+}
+
+.input::placeholder {
+  color: var(--sui-color-muted);
+}
+
+.submit,
+.clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid color-mix(in srgb, var(--sui-color-fg) 12%, transparent);
+  border-radius: var(--sui-radius-sm);
+  background: var(--sui-color-primary);
+  color: var(--sui-color-bg);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.clear {
+  position: absolute;
+  top: 50%;
+  right: 7rem;
+  width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--sui-color-muted);
+  font-size: 1.25rem;
+}
+
+.submit:focus-visible,
+.clear:focus-visible {
+  outline: 2px solid var(--sui-color-primary);
+  outline-offset: 2px;
+}
+
+.statusLine {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.1rem 0;
+  color: var(--sui-color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.notMappedCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--sui-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.notMappedCount svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 40rem) {
+  .search {
+    width: calc(100% - 3.25rem);
+  }
+
+  .statusLine {
+    width: calc(100% - 3.25rem);
+  }
+
+  .submit {
+    padding-inline: 0.65rem;
+  }
+
+  .clear {
+    right: 5.65rem;
+  }
+}

@@ -5,12 +5,14 @@ import {
   type TileLayerId,
   useMapLibreMap,
 } from "@shappoff/ui/map";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { AlgoliaPlaceSearchHit } from "@/prebuild/algoliaPlaces";
 import { BasemapSelect } from "./BasemapSelect";
 import { PlacesClusterLayer } from "./PlacesClusterLayer";
 import { PlacesFilterPanel } from "./PlacesFilterPanel";
 import { UnlocatedPlaces } from "./UnlocatedPlaces";
+import { PlacesSearchPanel } from "./PlacesSearchPanel";
 import { useAtdFilterIndex } from "./useAtdFilterIndex";
 import { useAtdFilterRoute } from "./useAtdFilterRoute";
 
@@ -45,6 +47,13 @@ export function MapCanvas({
   const index = useAtdFilterIndex(filtersUrl);
   const { selection, ready, onChange } = useAtdFilterRoute(index);
   const [basemap, setBasemap] = useState<TileLayerId>("osm");
+  const [searchResults, setSearchResults] = useState<
+    AlgoliaPlaceSearchHit[] | null
+  >(null);
+  const searchResultIds = useMemo(
+    () => searchResults?.map((place) => place.row) ?? null,
+    [searchResults],
+  );
 
   return (
     <MapLibreMap
@@ -55,12 +64,24 @@ export function MapCanvas({
     >
       <FreeMapBounds />
       <BasemapSelect value={basemap} onChange={setBasemap} />
-      <PlacesFilterPanel index={index} value={selection} onChange={onChange} />
+      <PlacesFilterPanel
+        index={index}
+        value={selection}
+        onChange={onChange}
+        search={
+          <PlacesSearchPanel
+            index={index}
+            filter={selection}
+            onResultsChange={setSearchResults}
+          />
+        }
+      />
       <UnlocatedPlaces url={unlocatedUrl} selection={selection} />
       <PlacesClusterLayer
         dataUrl={placesUrl}
         filter={selection}
         active={ready}
+        searchResultIds={searchResultIds}
       />
       {children}
     </MapLibreMap>

@@ -1,4 +1,3 @@
-import { hasPlaceCoordinates } from "./placeCoordinates";
 import type { PlaceItem } from "./types";
 
 export type AtdPath = {
@@ -124,10 +123,6 @@ export function buildAtdFilterIndex(places: PlaceItem[]): AtdFilterIndex {
   const paths: AtdPath[] = [];
 
   for (const place of places) {
-    if (!hasPlaceCoordinates(place)) {
-      continue;
-    }
-
     for (const path of collectAtdPaths(place.atd)) {
       const key = pathKey(path);
       if (seen.has(key)) {

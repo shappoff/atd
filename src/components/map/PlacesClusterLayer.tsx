@@ -24,12 +24,14 @@ type PlacesClusterLayerProps = {
   dataUrl: string;
   filter: AtdFilterSelection;
   active: boolean;
+  searchResultIds: number[] | null;
 };
 
 export function PlacesClusterLayer({
   dataUrl,
   filter,
   active,
+  searchResultIds,
 }: PlacesClusterLayerProps) {
   const map = useMapLibreMap();
   const [open, setOpen] = useState(false);
@@ -37,6 +39,7 @@ export function PlacesClusterLayer({
   const [geojson, setGeojson] = useState<PlacesGeoJson | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const framedFilter = useRef<string | null>(null);
+  const detailRequest = useRef(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -71,11 +74,9 @@ export function PlacesClusterLayer({
     }
 
     let alive = true;
-    let request = 0;
-
     mountPlacesCluster(map, geojson);
     const detach = attachPlacesClusterInteractions(map, (hit) => {
-      const current = ++request;
+      const current = ++detailRequest.current;
       setPlace({
         title: hit.title,
         type: hit.type,
@@ -86,7 +87,7 @@ export function PlacesClusterLayer({
 
       void loadPlaceDetails(hit.id)
         .then((details) => {
-          if (!alive || current !== request) {
+          if (!alive || current !== detailRequest.current) {
             return;
           }
           setPlace({
@@ -97,7 +98,7 @@ export function PlacesClusterLayer({
           });
         })
         .catch(() => {
-          if (!alive || current !== request) {
+          if (!alive || current !== detailRequest.current) {
             return;
           }
           setPlace({
@@ -120,20 +121,32 @@ export function PlacesClusterLayer({
     if (!active || !geojson) {
       return;
     }
-    const places = filterPlacesGeoJson(geojson, filter);
+    const places = filterPlacesGeoJson(geojson, filter, searchResultIds);
     setPlacesClusterData(map, places);
 
-    const key = [filter.gubernia, filter.uezd, filter.volost].join("\0");
+    const key = [
+      filter.gubernia,
+      filter.uezd,
+      filter.volost,
+      searchResultIds == null ? "" : JSON.stringify(searchResultIds),
+    ].join("\0");
     if (framedFilter.current === key) {
       return;
     }
-    if (!hasAtdFilterSelection(filter) && framedFilter.current == null) {
+    if (
+      !hasAtdFilterSelection(filter) &&
+      searchResultIds == null &&
+      framedFilter.current == null
+    ) {
       framedFilter.current = key;
       return;
     }
     framedFilter.current = key;
+    if (!hasAtdFilterSelection(filter) && searchResultIds == null) {
+      return;
+    }
     framePlaces(map, places);
-  }, [active, map, geojson, filter]);
+  }, [active, map, geojson, filter, searchResultIds]);
 
   return (
     <>
