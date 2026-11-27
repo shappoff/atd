@@ -21,7 +21,6 @@ type PlacesSearchPanelProps = {
   index: AtdFilterIndex | null;
   filter: AtdFilterSelection;
   onResultsChange: (results: AlgoliaPlaceSearchHit[] | null) => void;
-  onSelectPlace: (place: AlgoliaPlaceSearchHit) => void;
 };
 
 function hasCoordinates(place: AlgoliaPlaceSearchHit): boolean {
@@ -31,14 +30,6 @@ function hasCoordinates(place: AlgoliaPlaceSearchHit): boolean {
     Number.isFinite(place.lat) &&
     Number.isFinite(place.lng)
   );
-}
-
-function pathLabel(place: AlgoliaPlaceSearchHit): string {
-  const path = place.atdPaths[0];
-  if (!path) {
-    return "";
-  }
-  return [path.gubernia, path.uezd, path.volost].filter(Boolean).join(" · ");
 }
 
 function NotOnMapIcon() {
@@ -70,7 +61,6 @@ export function PlacesSearchPanel({
   index,
   filter,
   onResultsChange,
-  onSelectPlace,
 }: PlacesSearchPanelProps) {
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
@@ -220,64 +210,30 @@ export function PlacesSearchPanel({
         <button className={styles.submit} type="submit" disabled={loading}>
           {loading ? "Ищем…" : "Искать"}
         </button>
-        {submittedQuery || loading || error ? (
-          <div className={styles.results} aria-live="polite">
-            {loading ? (
-              <p className={styles.status} role="status">
-                Ищем населённые пункты…
-              </p>
-            ) : null}
-            {error ? (
-              <p className={styles.status} role="alert">
-                {error}
-              </p>
-            ) : null}
-            {!loading && !error && results ? (
-              <>
-                <p className={styles.summary}>
-                  <span>
-                    {totalHits > results.length
-                      ? `Показано ${results.length} из ${totalHits}`
-                      : `Найдено: ${totalHits}`}
-                    . На карте: {mappedCount}
-                  </span>
-                  <span className={styles.notMappedCount}>
-                    <NotOnMapIcon />
-                    Без координат: {unmappedCount}
-                  </span>
-                </p>
-                {results.length === 0 ? (
-                  <p className={styles.status}>Ничего не найдено.</p>
-                ) : (
-                  results.map((place) => (
-                    <button
-                      className={styles.result}
-                      key={place.objectID}
-                      type="button"
-                      onClick={() => onSelectPlace(place)}
-                    >
-                      <span className={styles.title}>
-                        {place.title}
-                        {place.type ? `, ${place.type}` : ""}
-                      </span>
-                      {pathLabel(place) ? (
-                        <span className={styles.details}>
-                          {pathLabel(place)}
-                        </span>
-                      ) : null}
-                      {!hasCoordinates(place) ? (
-                        <span className={styles.notMapped}>
-                          Нет на карте · откроется карточка
-                        </span>
-                      ) : null}
-                    </button>
-                  ))
-                )}
-              </>
-            ) : null}
-          </div>
-        ) : null}
       </form>
+      {submittedQuery || loading || error ? (
+        <div className={styles.statusLine} aria-live="polite">
+          {loading ? <span role="status">Ищем населённые пункты…</span> : null}
+          {error ? <span role="alert">{error}</span> : null}
+          {!loading && !error && results ? (
+            <>
+              <span>
+                {totalHits > results.length
+                  ? `Показано ${results.length} из ${totalHits}`
+                  : `Найдено: ${totalHits}`}
+                . На карте: {mappedCount}
+              </span>
+              <span
+                className={styles.notMappedCount}
+                title={`Населённых пунктов без координат: ${unmappedCount}`}
+              >
+                <NotOnMapIcon />
+                {unmappedCount}
+              </span>
+            </>
+          ) : null}
+        </div>
+      ) : null}
     </search>
   );
 }

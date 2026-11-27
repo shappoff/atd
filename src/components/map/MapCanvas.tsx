@@ -5,13 +5,7 @@ import {
   type TileLayerId,
   useMapLibreMap,
 } from "@shappoff/ui/map";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { AlgoliaPlaceSearchHit } from "@/prebuild/algoliaPlaces";
 import { BasemapSelect } from "./BasemapSelect";
@@ -53,15 +47,9 @@ export function MapCanvas({
   const [searchResults, setSearchResults] = useState<
     AlgoliaPlaceSearchHit[] | null
   >(null);
-  const [selectedPlace, setSelectedPlace] =
-    useState<AlgoliaPlaceSearchHit | null>(null);
   const searchResultIds = useMemo(
     () => searchResults?.map((place) => place.row) ?? null,
     [searchResults],
-  );
-  const handleSelectedPlaceHandled = useCallback(
-    () => setSelectedPlace(null),
-    [],
   );
 
   return (
@@ -82,7 +70,6 @@ export function MapCanvas({
             index={index}
             filter={selection}
             onResultsChange={setSearchResults}
-            onSelectPlace={setSelectedPlace}
           />
         }
       />
@@ -91,8 +78,6 @@ export function MapCanvas({
         filter={selection}
         active={ready}
         searchResultIds={searchResultIds}
-        selectedPlace={selectedPlace}
-        onSelectedPlaceHandled={handleSelectedPlaceHandled}
       />
       {children}
     </MapLibreMap>

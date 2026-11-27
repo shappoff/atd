@@ -2,7 +2,6 @@
 
 import { useMapLibreMap } from "@shappoff/ui/map";
 import { useEffect, useRef, useState } from "react";
-import type { AlgoliaPlaceSearchHit } from "@/prebuild/algoliaPlaces";
 import {
   type AtdFilterSelection,
   hasAtdFilterSelection,
@@ -26,8 +25,6 @@ type PlacesClusterLayerProps = {
   filter: AtdFilterSelection;
   active: boolean;
   searchResultIds: number[] | null;
-  selectedPlace: AlgoliaPlaceSearchHit | null;
-  onSelectedPlaceHandled: () => void;
 };
 
 export function PlacesClusterLayer({
@@ -35,8 +32,6 @@ export function PlacesClusterLayer({
   filter,
   active,
   searchResultIds,
-  selectedPlace,
-  onSelectedPlaceHandled,
 }: PlacesClusterLayerProps) {
   const map = useMapLibreMap();
   const [open, setOpen] = useState(false);
@@ -121,57 +116,6 @@ export function PlacesClusterLayer({
       unmountPlacesCluster(map);
     };
   }, [active, map, geojson]);
-
-  useEffect(() => {
-    if (!selectedPlace) {
-      return;
-    }
-
-    const current = ++detailRequest.current;
-    if (
-      selectedPlace.lat != null &&
-      selectedPlace.lng != null &&
-      Number.isFinite(selectedPlace.lat) &&
-      Number.isFinite(selectedPlace.lng)
-    ) {
-      map.easeTo({
-        center: [selectedPlace.lng, selectedPlace.lat],
-        zoom: Math.max(map.getZoom(), 12),
-      });
-    }
-
-    setPlace({
-      title: selectedPlace.title,
-      type: selectedPlace.type,
-      details: null,
-      error: false,
-    });
-    setOpen(true);
-    onSelectedPlaceHandled();
-    void loadPlaceDetails(selectedPlace.row)
-      .then((details) => {
-        if (current !== detailRequest.current) {
-          return;
-        }
-        setPlace({
-          title: details.title,
-          type: details.type,
-          details,
-          error: false,
-        });
-      })
-      .catch(() => {
-        if (current !== detailRequest.current) {
-          return;
-        }
-        setPlace({
-          title: selectedPlace.title,
-          type: selectedPlace.type,
-          details: null,
-          error: true,
-        });
-      });
-  }, [map, onSelectedPlaceHandled, selectedPlace]);
 
   useEffect(() => {
     if (!active || !geojson) {

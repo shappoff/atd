@@ -72,108 +72,29 @@
 }
 
 .submit:focus-visible,
-.clear:focus-visible,
-.result:focus-visible {
+.clear:focus-visible {
   outline: 2px solid var(--sui-color-primary);
   outline-offset: 2px;
 }
 
-.results {
-  position: absolute;
-  top: calc(100% + 0.4rem);
-  left: 0;
-  right: 0;
-  z-index: 1250;
-  max-height: min(28rem, calc(100dvh - 8rem));
-  overflow: auto;
-  border: 1px solid color-mix(in srgb, var(--sui-color-fg) 12%, transparent);
-  border-radius: var(--sui-radius-sm);
-  background: var(--sui-color-bg);
-  color: var(--sui-color-fg);
-  box-shadow: 0 8px 24px
-    color-mix(in srgb, var(--sui-color-fg) 18%, transparent);
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
-
-.summary,
-.status {
-  padding: 0.75rem;
+.statusLine {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.1rem 0;
   color: var(--sui-color-muted);
   font-size: 0.8125rem;
   line-height: 1.4;
-}
-
-.summary {
-  display: grid;
-  gap: 0.45rem;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--sui-color-fg) 10%, transparent);
-  background: var(--sui-color-bg);
-  color: var(--sui-color-fg);
-}
-
-.result {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
-  width: 100%;
-  padding: 0.65rem 0.75rem;
-  border: 0;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--sui-color-fg) 7%, transparent);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.result:hover {
-  background: color-mix(
-    in srgb,
-    var(--sui-color-primary) 9%,
-    var(--sui-color-bg)
-  );
-}
-
-.title {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.details {
-  color: var(--sui-color-muted);
-  font-size: 0.78rem;
-  line-height: 1.35;
-}
-
-.notMapped {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-top: 0.15rem;
-  color: var(--sui-color-primary);
-  font-size: 0.75rem;
 }
 
 .notMappedCount {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  width: fit-content;
-  padding: 0.25rem 0.45rem;
-  border-radius: var(--sui-radius-sm);
-  background: color-mix(
-    in srgb,
-    var(--sui-color-primary) 9%,
-    var(--sui-color-bg)
-  );
   color: var(--sui-color-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .notMappedCount svg {
@@ -182,6 +103,10 @@
 
 @media (max-width: 40rem) {
   .search {
+    width: calc(100% - 3.25rem);
+  }
+
+  .statusLine {
     width: calc(100% - 3.25rem);
   }
 

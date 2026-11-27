@@ -57,7 +57,7 @@ export default async function updateAlgoliaIndex(): Promise<void> {
   await client.waitForTask({ indexName, taskID: settingsTask.taskID });
   await client.replaceAllObjects({
     indexName,
-    objects,
+    objects: objects.slice(0, 1000), // TODO: test
     batchSize: 1000,
     scopes: ["settings"],
   });
