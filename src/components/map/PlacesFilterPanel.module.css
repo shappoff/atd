@@ -1,19 +1,39 @@
-.panel {
+.controls,
+.mobileControls {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 510;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: center;
-  gap: var(--sui-space-2);
   padding: calc(var(--sui-space-2) + env(safe-area-inset-top, 0px))
     calc(var(--sui-space-3) + env(safe-area-inset-right, 0px))
     var(--sui-space-2) calc(var(--sui-space-3) + env(safe-area-inset-left, 0px));
   border-bottom: 1px solid
     color-mix(in srgb, var(--sui-color-fg) 10%, transparent);
   background: var(--sui-color-bg);
+  pointer-events: auto;
+}
+
+.controls {
+  display: grid;
+  gap: var(--sui-space-2);
+}
+
+.mobileControls {
+  min-height: calc(3.75rem + env(safe-area-inset-top, 0px));
+  padding-right: calc(0.75rem + env(safe-area-inset-right, 0px));
+  padding-left: calc(0.75rem + env(safe-area-inset-left, 0px));
+}
+
+.panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: var(--sui-space-2);
+  padding: 0;
+  border: 0;
+  background: transparent;
   pointer-events: auto;
 }
 

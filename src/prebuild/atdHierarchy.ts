@@ -123,15 +123,6 @@ export function buildAtdFilterIndex(places: PlaceItem[]): AtdFilterIndex {
   const paths: AtdPath[] = [];
 
   for (const place of places) {
-    if (
-      place.lat == null ||
-      place.lng == null ||
-      !Number.isFinite(place.lat) ||
-      !Number.isFinite(place.lng)
-    ) {
-      continue;
-    }
-
     for (const path of collectAtdPaths(place.atd)) {
       const key = pathKey(path);
       if (seen.has(key)) {

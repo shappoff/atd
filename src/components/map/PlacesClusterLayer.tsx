@@ -2,6 +2,7 @@
 
 import { useMapLibreMap } from "@shappoff/ui/map";
 import { useEffect, useRef, useState } from "react";
+import type { AlgoliaPlaceSearchHit } from "@/prebuild/algoliaPlaces";
 import {
   type AtdFilterSelection,
   hasAtdFilterSelection,
@@ -24,12 +25,18 @@ type PlacesClusterLayerProps = {
   dataUrl: string;
   filter: AtdFilterSelection;
   active: boolean;
+  searchResultIds: number[] | null;
+  selectedPlace: AlgoliaPlaceSearchHit | null;
+  onSelectedPlaceHandled: () => void;
 };
 
 export function PlacesClusterLayer({
   dataUrl,
   filter,
   active,
+  searchResultIds,
+  selectedPlace,
+  onSelectedPlaceHandled,
 }: PlacesClusterLayerProps) {
   const map = useMapLibreMap();
   const [open, setOpen] = useState(false);
@@ -37,6 +44,7 @@ export function PlacesClusterLayer({
   const [geojson, setGeojson] = useState<PlacesGeoJson | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const framedFilter = useRef<string | null>(null);
+  const detailRequest = useRef(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -71,11 +79,9 @@ export function PlacesClusterLayer({
     }
 
     let alive = true;
-    let request = 0;
-
     mountPlacesCluster(map, geojson);
     const detach = attachPlacesClusterInteractions(map, (hit) => {
-      const current = ++request;
+      const current = ++detailRequest.current;
       setPlace({
         title: hit.title,
         type: hit.type,
@@ -86,7 +92,7 @@ export function PlacesClusterLayer({
 
       void loadPlaceDetails(hit.id)
         .then((details) => {
-          if (!alive || current !== request) {
+          if (!alive || current !== detailRequest.current) {
             return;
           }
           setPlace({
@@ -97,7 +103,7 @@ export function PlacesClusterLayer({
           });
         })
         .catch(() => {
-          if (!alive || current !== request) {
+          if (!alive || current !== detailRequest.current) {
             return;
           }
           setPlace({
@@ -117,23 +123,86 @@ export function PlacesClusterLayer({
   }, [active, map, geojson]);
 
   useEffect(() => {
+    if (!selectedPlace) {
+      return;
+    }
+
+    const current = ++detailRequest.current;
+    if (
+      selectedPlace.lat != null &&
+      selectedPlace.lng != null &&
+      Number.isFinite(selectedPlace.lat) &&
+      Number.isFinite(selectedPlace.lng)
+    ) {
+      map.easeTo({
+        center: [selectedPlace.lng, selectedPlace.lat],
+        zoom: Math.max(map.getZoom(), 12),
+      });
+    }
+
+    setPlace({
+      title: selectedPlace.title,
+      type: selectedPlace.type,
+      details: null,
+      error: false,
+    });
+    setOpen(true);
+    onSelectedPlaceHandled();
+    void loadPlaceDetails(selectedPlace.row)
+      .then((details) => {
+        if (current !== detailRequest.current) {
+          return;
+        }
+        setPlace({
+          title: details.title,
+          type: details.type,
+          details,
+          error: false,
+        });
+      })
+      .catch(() => {
+        if (current !== detailRequest.current) {
+          return;
+        }
+        setPlace({
+          title: selectedPlace.title,
+          type: selectedPlace.type,
+          details: null,
+          error: true,
+        });
+      });
+  }, [map, onSelectedPlaceHandled, selectedPlace]);
+
+  useEffect(() => {
     if (!active || !geojson) {
       return;
     }
-    const places = filterPlacesGeoJson(geojson, filter);
+    const places = filterPlacesGeoJson(geojson, filter, searchResultIds);
     setPlacesClusterData(map, places);
 
-    const key = [filter.gubernia, filter.uezd, filter.volost].join("\0");
+    const key = [
+      filter.gubernia,
+      filter.uezd,
+      filter.volost,
+      searchResultIds == null ? "" : JSON.stringify(searchResultIds),
+    ].join("\0");
     if (framedFilter.current === key) {
       return;
     }
-    if (!hasAtdFilterSelection(filter) && framedFilter.current == null) {
+    if (
+      !hasAtdFilterSelection(filter) &&
+      searchResultIds == null &&
+      framedFilter.current == null
+    ) {
       framedFilter.current = key;
       return;
     }
     framedFilter.current = key;
+    if (!hasAtdFilterSelection(filter) && searchResultIds == null) {
+      return;
+    }
     framePlaces(map, places);
-  }, [active, map, geojson, filter]);
+  }, [active, map, geojson, filter, searchResultIds]);
 
   return (
     <>

@@ -5,11 +5,19 @@ import {
   type TileLayerId,
   useMapLibreMap,
 } from "@shappoff/ui/map";
-import { type ReactNode, useEffect, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { AlgoliaPlaceSearchHit } from "@/prebuild/algoliaPlaces";
 import { BasemapSelect } from "./BasemapSelect";
 import { PlacesClusterLayer } from "./PlacesClusterLayer";
 import { PlacesFilterPanel } from "./PlacesFilterPanel";
+import { PlacesSearchPanel } from "./PlacesSearchPanel";
 import { useAtdFilterIndex } from "./useAtdFilterIndex";
 import { useAtdFilterRoute } from "./useAtdFilterRoute";
 
@@ -42,6 +50,19 @@ export function MapCanvas({
   const index = useAtdFilterIndex(filtersUrl);
   const { selection, ready, onChange } = useAtdFilterRoute(index);
   const [basemap, setBasemap] = useState<TileLayerId>("osm");
+  const [searchResults, setSearchResults] = useState<
+    AlgoliaPlaceSearchHit[] | null
+  >(null);
+  const [selectedPlace, setSelectedPlace] =
+    useState<AlgoliaPlaceSearchHit | null>(null);
+  const searchResultIds = useMemo(
+    () => searchResults?.map((place) => place.row) ?? null,
+    [searchResults],
+  );
+  const handleSelectedPlaceHandled = useCallback(
+    () => setSelectedPlace(null),
+    [],
+  );
 
   return (
     <MapLibreMap
@@ -52,11 +73,26 @@ export function MapCanvas({
     >
       <FreeMapBounds />
       <BasemapSelect value={basemap} onChange={setBasemap} />
-      <PlacesFilterPanel index={index} value={selection} onChange={onChange} />
+      <PlacesFilterPanel
+        index={index}
+        value={selection}
+        onChange={onChange}
+        search={
+          <PlacesSearchPanel
+            index={index}
+            filter={selection}
+            onResultsChange={setSearchResults}
+            onSelectPlace={setSelectedPlace}
+          />
+        }
+      />
       <PlacesClusterLayer
         dataUrl={placesUrl}
         filter={selection}
         active={ready}
+        searchResultIds={searchResultIds}
+        selectedPlace={selectedPlace}
+        onSelectedPlaceHandled={handleSelectedPlaceHandled}
       />
       {children}
     </MapLibreMap>

@@ -8,7 +8,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@shappoff/ui";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   type AtdFilterIndex,
   type AtdFilterSelection,
@@ -25,6 +25,7 @@ type PlacesFilterPanelProps = {
   index: AtdFilterIndex | null;
   value: AtdFilterSelection;
   onChange: (value: AtdFilterSelection) => void;
+  search: ReactNode;
 };
 
 const FILTER_PANEL_OFFSET_VAR = "--atd-filter-panel-offset";
@@ -156,50 +157,6 @@ function PlacesFilterFields({
   );
 }
 
-function PlacesFilterBar({ index, value, onChange }: PlacesFilterPanelProps) {
-  const panelRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    const panel = panelRef.current;
-    const mapRoot = panel?.closest(".sui-map");
-    if (!(panel instanceof HTMLElement) || !(mapRoot instanceof HTMLElement)) {
-      return;
-    }
-
-    const syncOffset = () => {
-      mapRoot.style.setProperty(
-        FILTER_PANEL_OFFSET_VAR,
-        `${panel.offsetHeight}px`,
-      );
-    };
-
-    syncOffset();
-    const observer = new ResizeObserver(syncOffset);
-    observer.observe(panel);
-
-    return () => {
-      observer.disconnect();
-      mapRoot.style.removeProperty(FILTER_PANEL_OFFSET_VAR);
-    };
-  }, []);
-
-  return (
-    <form
-      ref={panelRef}
-      className={styles.panel}
-      aria-label="Фильтры административного деления"
-      onSubmit={(event) => event.preventDefault()}
-    >
-      <PlacesFilterFields
-        index={index}
-        value={value}
-        onChange={onChange}
-        clearMode="icon"
-      />
-    </form>
-  );
-}
-
 function PlacesFilterDrawer({
   index,
   value,
@@ -267,8 +224,55 @@ function PlacesFilterDrawer({
 
 export function PlacesFilterPanel(props: PlacesFilterPanelProps) {
   const narrow = useNarrowViewport();
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    const mapRoot = panel?.closest(".sui-map");
+    if (!(panel instanceof HTMLElement) || !(mapRoot instanceof HTMLElement)) {
+      return;
+    }
+
+    const syncOffset = () => {
+      mapRoot.style.setProperty(
+        FILTER_PANEL_OFFSET_VAR,
+        `${panel.offsetHeight}px`,
+      );
+    };
+
+    syncOffset();
+    const observer = new ResizeObserver(syncOffset);
+    observer.observe(panel);
+
+    return () => {
+      observer.disconnect();
+      mapRoot.style.removeProperty(FILTER_PANEL_OFFSET_VAR);
+    };
+  }, []);
+
   if (narrow) {
-    return <PlacesFilterDrawer {...props} />;
+    return (
+      <div ref={panelRef} className={styles.mobileControls}>
+        {props.search}
+        <PlacesFilterDrawer {...props} />
+      </div>
+    );
   }
-  return <PlacesFilterBar {...props} />;
+  return (
+    <div ref={panelRef} className={styles.controls}>
+      <form
+        className={styles.panel}
+        aria-label="Фильтры административного деления"
+        onSubmit={(event) => event.preventDefault()}
+      >
+        <PlacesFilterFields
+          index={props.index}
+          value={props.value}
+          onChange={props.onChange}
+          clearMode="icon"
+        />
+      </form>
+      {props.search}
+    </div>
+  );
 }
