@@ -11,8 +11,8 @@ import type { AlgoliaPlaceSearchHit } from "@/prebuild/algoliaPlaces";
 import { BasemapSelect } from "./BasemapSelect";
 import { PlacesClusterLayer } from "./PlacesClusterLayer";
 import { PlacesFilterPanel } from "./PlacesFilterPanel";
-import { UnlocatedPlaces } from "./UnlocatedPlaces";
 import { PlacesSearchPanel } from "./PlacesSearchPanel";
+import { UnlocatedPlaces } from "./UnlocatedPlaces";
 import { useAtdFilterIndex } from "./useAtdFilterIndex";
 import { useAtdFilterRoute } from "./useAtdFilterRoute";
 
